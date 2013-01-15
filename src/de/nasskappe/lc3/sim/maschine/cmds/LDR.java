@@ -27,5 +27,17 @@ public class LDR implements ICommand {
 		// TODO Auto-generated method stub
 		
 	}
+
+	public Register getDr() {
+		return dr;
+	}
+	
+	public Register getBaseR() {
+		return baseR;
+	}
+	
+	public short getOffset() {
+		return offset;
+	}
 	
 }

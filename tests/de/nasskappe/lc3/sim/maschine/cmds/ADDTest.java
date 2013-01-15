@@ -1,29 +1,20 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.nasskappe.lc3.sim.maschine.Lc3Exception;
 import de.nasskappe.lc3.sim.maschine.Register;
 
 public class ADDTest {
-
+	
 	private static short b(String s) {
 		return (short) Integer.parseInt(s.replaceAll(" ", ""), 2);
 	}
 
-	private CommandFactory f;
-	
-	@Before
-	public void setup() {
-		f = new CommandFactory();
-	}
-	
 	@Test
-	public void test_two_register() throws Lc3Exception {
+	public void test_two_registers() throws Lc3Exception {
 		ADD add = new ADD();
 		add.init(b("0001 010 000 0 00 001"));
 		assertEquals(Register.R2, add.getDr());

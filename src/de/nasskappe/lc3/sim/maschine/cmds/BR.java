@@ -5,16 +5,16 @@ public class BR implements ICommand {
 	private boolean n;
 	private boolean z;
 	private boolean p;
-	private short offset;
+	private short pcOffset;
 
 	@Override
 	public void init(short code) throws IllegalOpcodeException {
 		n = (code & (1<<11)) != 0;
 		z = (code & (1<<10)) != 0;
 		p = (code & (1<<9)) != 0;
-		offset = (short) (code & 0x01FF);
-		if ((offset & 0x100) != 0) {
-			offset |= 0xFF00;
+		pcOffset = (short) (code & 0x01FF);
+		if ((pcOffset & 0x100) != 0) {
+			pcOffset |= 0xFF00;
 		}
 	}
 
@@ -24,4 +24,20 @@ public class BR implements ICommand {
 
 	}
 
+	public boolean isN() {
+		return n;
+	}
+
+	public boolean isZ() {
+		return z;
+	}
+
+	public boolean isP() {
+		return p;
+	}
+
+	public short getPCOffset() {
+		return pcOffset;
+	}
+	
 }

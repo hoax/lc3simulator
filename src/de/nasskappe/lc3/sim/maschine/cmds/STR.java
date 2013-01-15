@@ -27,5 +27,17 @@ public class STR implements ICommand {
 		// TODO Auto-generated method stub
 		
 	}
+
+	public Register getSr() {
+		return sr;
+	}
+	
+	public Register getBaseR() {
+		return baseR;
+	}
+	
+	public short getOffset() {
+		return offset;
+	}
 	
 }

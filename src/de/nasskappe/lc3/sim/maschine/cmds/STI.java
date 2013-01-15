@@ -23,4 +23,11 @@ public class STI implements ICommand {
 		
 	}
 
+	public Register getSr() {
+		return sr;
+	}
+	
+	public short getPcOffset() {
+		return pcOffset;
+	}
 }

@@ -23,4 +23,11 @@ public class LDI implements ICommand {
 		
 	}
 
+	public Register getDr() {
+		return dr;
+	}
+	
+	public short getPcOffset() {
+		return pcOffset;
+	}
 }

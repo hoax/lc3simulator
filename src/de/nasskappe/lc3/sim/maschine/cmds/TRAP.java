@@ -18,4 +18,7 @@ public class TRAP implements ICommand {
 		
 	}
 
+	public int getTrap() {
+		return trap;
+	}
 }

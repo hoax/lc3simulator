@@ -18,7 +18,7 @@ public class AND implements ICommand {
 		sr1 = Register.values()[sr1Byte];
 		
 		int registerOrImm = (code & 0x0020) >> 5;
-		if (registerOrImm != 0) {
+		if (registerOrImm == 0) {
 			if ((code & 0x0018) != 0)
 				throw new IllegalOpcodeException(code);
 			
@@ -39,4 +39,21 @@ public class AND implements ICommand {
 		// TODO Auto-generated method stub
 		
 	}
+
+	public Register getDr() {
+		return dr;
+	}
+	
+	public Register getSr1() {
+		return sr1;
+	}
+	
+	public Register getSr2() {
+		return sr2;
+	}
+	
+	public short getImm() {
+		return imm;
+	}
+	
 }

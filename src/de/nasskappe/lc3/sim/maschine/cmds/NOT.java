@@ -25,4 +25,12 @@ public class NOT implements ICommand {
 		
 	}
 
+	public Register getSr() {
+		return sr;
+	}
+	
+	public Register getDr() {
+		return dr;
+	}
+	
 }
