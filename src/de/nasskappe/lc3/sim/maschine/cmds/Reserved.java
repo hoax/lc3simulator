@@ -1,9 +1,11 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
+import de.nasskappe.lc3.sim.maschine.CPU;
+
 public class Reserved implements ICommand {
 
 	@Override
-	public void execute() {
+	public void execute(CPU cpu) {
 	}
 
 	@Override

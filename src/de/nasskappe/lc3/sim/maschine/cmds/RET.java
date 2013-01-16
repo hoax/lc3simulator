@@ -1,5 +1,8 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
+import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.Register;
+
 public class RET implements ICommand {
 
 	@Override
@@ -9,9 +12,9 @@ public class RET implements ICommand {
 	}
 	
 	@Override
-	public void execute() {
-		// TODO Auto-generated method stub
-		
+	public void execute(CPU cpu) {
+		short addr = cpu.getRegister(Register.R7);
+		cpu.setPC(addr);
 	}
 
 }

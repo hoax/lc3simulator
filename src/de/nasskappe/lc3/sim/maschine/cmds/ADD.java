@@ -1,5 +1,6 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
+import de.nasskappe.lc3.sim.maschine.CPU;
 import de.nasskappe.lc3.sim.maschine.Register;
 
 public class ADD implements ICommand {
@@ -35,12 +36,17 @@ public class ADD implements ICommand {
 	}
 
 	@Override
-	public void execute() {
-		// TODO Auto-generated method stub
-
+	public void execute(CPU cpu) {
+		int val1 = cpu.getRegister(sr1);
+		int val2 = imm;
+		if (sr2 != null) {
+			val2 = cpu.getRegister(sr2);
+		}
+		short result = (short) (val1 + val2);
+		cpu.setRegister(dr, result);
+		cpu.updateCC(result);
 	}
 
-	
 	public Register getDr() {
 		return dr;
 	}

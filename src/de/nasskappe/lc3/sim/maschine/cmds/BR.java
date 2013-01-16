@@ -1,5 +1,9 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
+import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.Register;
+import de.nasskappe.lc3.sim.maschine.Register.CC_Value;
+
 public class BR implements ICommand {
 
 	private boolean n;
@@ -19,9 +23,15 @@ public class BR implements ICommand {
 	}
 
 	@Override
-	public void execute() {
-		// TODO Auto-generated method stub
-
+	public void execute(CPU cpu) {
+		CC_Value cc = cpu.getCC();
+		if ((p && (cc == Register.CC_Value.P))
+				|| (n && (cc == Register.CC_Value.N))
+				|| (z && (cc == Register.CC_Value.Z))) {
+			int pc = cpu.getPC();
+			pc += pcOffset;
+			cpu.setPC(pc);
+		}
 	}
 
 	public boolean isN() {

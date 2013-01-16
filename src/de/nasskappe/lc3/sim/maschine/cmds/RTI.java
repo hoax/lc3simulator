@@ -1,5 +1,7 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
+import de.nasskappe.lc3.sim.maschine.CPU;
+
 public class RTI implements ICommand {
 
 	@Override
@@ -9,9 +11,8 @@ public class RTI implements ICommand {
 	}
 	
 	@Override
-	public void execute() {
-		// TODO Auto-generated method stub
-		
+	public void execute(CPU cpu) {
+		// TODO
 	}
 
 }

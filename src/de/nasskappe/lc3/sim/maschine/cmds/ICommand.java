@@ -1,8 +1,10 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
+import de.nasskappe.lc3.sim.maschine.CPU;
+
 public interface ICommand {
 
-	void execute();
+	void execute(CPU cpu);
 
 	void init(short code) throws IllegalOpcodeException;
 	

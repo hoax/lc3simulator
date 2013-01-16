@@ -1,5 +1,7 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
+import de.nasskappe.lc3.sim.maschine.CPU;
+
 public class TRAP implements ICommand {
 
 	private int trap;
@@ -13,9 +15,8 @@ public class TRAP implements ICommand {
 	}
 	
 	@Override
-	public void execute() {
-		// TODO Auto-generated method stub
-		
+	public void execute(CPU cpu) {
+		// TODO
 	}
 
 	public int getTrap() {

@@ -18,7 +18,7 @@ public class JSRTest {
 		JSR jsr = new JSR();
 		jsr.init(b("0100  1 010 1010 1010"));
 		
-		assertEquals(682, jsr.getOffset());
+		assertEquals(682, jsr.getPCOffset());
 		assertNull(jsr.getBaseR());
 	}
 
@@ -27,7 +27,7 @@ public class JSRTest {
 		JSR jsr = new JSR();
 		jsr.init(b("0100 1 101 0101 0110"));
 		
-		assertEquals(-682, jsr.getOffset());
+		assertEquals(-682, jsr.getPCOffset());
 		assertNull(jsr.getBaseR());
 	}
 	
@@ -43,7 +43,7 @@ public class JSRTest {
 		jsr.init(b("0100 000 001 000000"));
 		
 		assertEquals(Register.R1, jsr.getBaseR());
-		assertEquals(-1, jsr.getOffset());
+		assertEquals(-1, jsr.getPCOffset());
 	}
 
 }

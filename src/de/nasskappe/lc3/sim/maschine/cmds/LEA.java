@@ -1,5 +1,6 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
+import de.nasskappe.lc3.sim.maschine.CPU;
 import de.nasskappe.lc3.sim.maschine.Register;
 
 public class LEA implements ICommand {
@@ -18,9 +19,10 @@ public class LEA implements ICommand {
 	}
 	
 	@Override
-	public void execute() {
-		// TODO Auto-generated method stub
-		
+	public void execute(CPU cpu) {
+		int addr = cpu.getPC() + pcOffset;
+		cpu.setRegister(dr, (short) addr);
+		cpu.updateCC((short)addr);
 	}
 	
 	public Register getDr() {
