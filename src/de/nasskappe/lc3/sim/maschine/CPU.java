@@ -1,5 +1,7 @@
 package de.nasskappe.lc3.sim.maschine;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,18 +19,32 @@ public class CPU {
 		cmdFactory = new CommandFactory();
 		mem = new Memory();
 		register = new HashMap<Register, Short>();
-		
+
+		register.put(Register.R0, (short) 0);
+		register.put(Register.R1, (short) 0);
+		register.put(Register.R2, (short) 0);
+		register.put(Register.R3, (short) 0);
+		register.put(Register.R4, (short) 0);
+		register.put(Register.R5, (short) 0);
+		register.put(Register.R6, (short) 0);
+		register.put(Register.R7, (short) 0);
+		register.put(Register.PC, (short) 0x3000);
+		register.put(Register.PSR, (short) 0);
+		updateCC((short) 0);
 	}
 	
-	public void loadData(int startAddress, byte[] data) {
-		for(byte b : data) {
-			mem.setValue(startAddress++, b);
+	public void loadData(int startAddress, InputStream input) throws IOException {
+		for(int b = input.read(); b != -1; b = input.read()) {
+			b <<= 8;
+			b |= input.read();
+			mem.setValue(startAddress++, (short) b);
 		}
 	}
 	
 	public void step() throws Lc3Exception {
 		Integer addr = getPC();
 		short code = mem.getValue(addr);
+		setRegister(Register.IR, code);
 		ICommand cmd = cmdFactory.createCommand((short)code);
 		register.put(Register.PC, (short) (addr + 1));
 
