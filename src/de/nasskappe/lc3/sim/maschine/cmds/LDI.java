@@ -34,4 +34,9 @@ public class LDI implements ICommand {
 	public short getPcOffset() {
 		return pcOffset;
 	}
+
+	@Override
+	public String getASM() {
+		return "LDI";
+	}
 }

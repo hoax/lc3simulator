@@ -33,5 +33,10 @@ public class ST implements ICommand {
 	public short getPcOffset() {
 		return pcOffset;
 	}
+
+	@Override
+	public String getASM() {
+		return "ST";
+	}
 	
 }

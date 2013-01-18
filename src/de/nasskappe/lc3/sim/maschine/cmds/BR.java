@@ -49,5 +49,10 @@ public class BR implements ICommand {
 	public short getPCOffset() {
 		return pcOffset;
 	}
+
+	@Override
+	public String getASM() {
+		return "BR";
+	}
 	
 }

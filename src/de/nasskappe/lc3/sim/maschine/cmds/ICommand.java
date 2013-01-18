@@ -7,5 +7,7 @@ public interface ICommand {
 	void execute(CPU cpu);
 
 	void init(short code) throws IllegalOpcodeException;
+
+	String getASM();
 	
 }

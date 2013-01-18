@@ -35,5 +35,10 @@ public class NOT implements ICommand {
 	public Register getDr() {
 		return dr;
 	}
+
+	@Override
+	public String getASM() {
+		return "NOT";
+	}
 	
 }

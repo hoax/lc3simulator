@@ -12,4 +12,9 @@ public class Reserved implements ICommand {
 	public void init(short code) throws IllegalOpcodeException {
 	}
 
+	@Override
+	public String getASM() {
+		return "---";
+	}
+
 }

@@ -41,5 +41,10 @@ public class STR implements ICommand {
 	public short getOffset() {
 		return offset;
 	}
+
+	@Override
+	public String getASM() {
+		return "STR";
+	}
 	
 }

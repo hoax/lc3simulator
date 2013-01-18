@@ -34,4 +34,9 @@ public class LD implements ICommand {
 	public short getPCOffset() {
 		return pcOffset;
 	}
+
+	@Override
+	public String getASM() {
+		return "LD";
+	}
 }

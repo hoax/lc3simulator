@@ -17,4 +17,9 @@ public class RET implements ICommand {
 		cpu.setPC(addr);
 	}
 
+	@Override
+	public String getASM() {
+		return "RET";
+	}
+
 }

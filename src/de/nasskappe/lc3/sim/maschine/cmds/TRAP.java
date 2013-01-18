@@ -22,4 +22,9 @@ public class TRAP implements ICommand {
 	public int getTrap() {
 		return trap;
 	}
+
+	@Override
+	public String getASM() {
+		return "TRAP";
+	}
 }

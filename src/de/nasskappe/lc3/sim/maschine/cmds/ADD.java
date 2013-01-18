@@ -62,4 +62,9 @@ public class ADD implements ICommand {
 	public short getImm() {
 		return imm;
 	}
+
+	@Override
+	public String getASM() {
+		return "ADD";
+	}
 }

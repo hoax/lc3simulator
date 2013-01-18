@@ -42,5 +42,10 @@ public class LDR implements ICommand {
 	public short getOffset() {
 		return offset;
 	}
+
+	@Override
+	public String getASM() {
+		return "LDR";
+	}
 	
 }

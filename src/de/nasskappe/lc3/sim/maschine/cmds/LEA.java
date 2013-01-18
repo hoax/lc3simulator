@@ -33,4 +33,9 @@ public class LEA implements ICommand {
 		return pcOffset;
 	}
 
+	@Override
+	public String getASM() {
+		return "LEA";
+	}
+
 }

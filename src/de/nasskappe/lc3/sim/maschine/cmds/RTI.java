@@ -15,4 +15,9 @@ public class RTI implements ICommand {
 		// TODO
 	}
 
+	@Override
+	public String getASM() {
+		return "RTI";
+	}
+
 }

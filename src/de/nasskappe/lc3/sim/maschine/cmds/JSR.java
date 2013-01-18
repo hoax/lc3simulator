@@ -53,4 +53,9 @@ public class JSR implements ICommand {
 	public Register getBaseR() {
 		return baseR;
 	}
+
+	@Override
+	public String getASM() {
+		return "JSR";
+	}
 }
