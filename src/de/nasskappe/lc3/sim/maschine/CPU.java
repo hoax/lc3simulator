@@ -3,7 +3,9 @@ package de.nasskappe.lc3.sim.maschine;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import de.nasskappe.lc3.sim.maschine.Register.CC_Value;
 import de.nasskappe.lc3.sim.maschine.cmds.CommandFactory;
@@ -14,8 +16,10 @@ public class CPU {
 	private Memory mem;
 	private Map<Register, Short> register;
 	private CommandFactory cmdFactory;
+	private Set<ICPUListener> listeners;
 	
 	public CPU() {
+		listeners = new HashSet<ICPUListener>();
 		cmdFactory = new CommandFactory();
 		mem = new Memory();
 		register = new HashMap<Register, Short>();
@@ -30,6 +34,7 @@ public class CPU {
 		register.put(Register.R7, (short) 0);
 		register.put(Register.PC, (short) 0x3000);
 		register.put(Register.PSR, (short) 0);
+		register.put(Register.IR, (short) 0);
 		updateCC((short) 0);
 	}
 	
@@ -37,18 +42,27 @@ public class CPU {
 		for(int b = input.read(); b != -1; b = input.read()) {
 			b <<= 8;
 			b |= input.read();
-			mem.setValue(startAddress++, (short) b);
+			writeMemory(startAddress++, (short) b);
 		}
 	}
 	
-	public void step() throws Lc3Exception {
+	public ICommand step() throws Lc3Exception {
 		Integer addr = getPC();
-		short code = mem.getValue(addr);
+		short code = readMemory(addr);
 		setRegister(Register.IR, code);
 		ICommand cmd = cmdFactory.createCommand((short)code);
-		register.put(Register.PC, (short) (addr + 1));
+		setRegister(Register.PC, (short) (addr + 1));
 
 		cmd.execute(this);
+		fireInstructionExecuted(this, cmd);
+		
+		return cmd;
+	}
+
+	private void fireInstructionExecuted(CPU cpu, ICommand cmd) {
+		for(ICPUListener l : listeners) {
+			l.instructionExecuted(cpu, cmd);
+		}
 	}
 
 	public int getPC() {
@@ -56,11 +70,12 @@ public class CPU {
 	}
 	
 	public void setPC(int pc) {
-		register.put(Register.PC, (short) pc);
+		setRegister(Register.PC, (short) pc);
 	}
 	
 	public void setRegister(Register register, Short value) {
 		this.register.put(register, value);
+		fireRegisterChanged(register, value);
 	}
 	
 	public Short getRegister(Register register) {
@@ -74,7 +89,7 @@ public class CPU {
 		else if (value < 0)
 			ccValue = Register.CC_Value.N;
 		
-		this.register.put(Register.CC, (short) ccValue.ordinal());
+		setRegister(Register.CC, (short) ccValue.ordinal());
 	}
 	
 	public CC_Value getCC() {
@@ -88,5 +103,26 @@ public class CPU {
 	
 	public void writeMemory(int addr, short value) {
 		mem.setValue(addr, value);
+		fireMemoryChanged(this, addr, value);
+	}
+
+	private void fireMemoryChanged(CPU cpu, int addr, short value) {
+		for (ICPUListener l : listeners) {
+			l.memoryChanged(this, addr, value);
+		}
+	}
+
+	public void addCpuListener(ICPUListener listener) {
+		listeners.add(listener);
+	}
+	
+	public boolean removeCpuListener(ICPUListener listener) {
+		return listeners.remove(listener);
+	}
+	
+	private void fireRegisterChanged(Register register, short value) {
+		for(ICPUListener l : listeners) {
+			l.registerChanged(this, register, value);
+		}
 	}
 }
