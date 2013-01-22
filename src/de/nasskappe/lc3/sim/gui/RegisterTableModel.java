@@ -74,6 +74,14 @@ public class RegisterTableModel extends AbstractTableModel implements ICPUListen
 	@Override
 	public void memoryChanged(CPU cpu, int addr, short value) {
 	}
+	
+	@Override
+	public Class<?> getColumnClass(int columnIndex) {
+		if (columnIndex % 2 == 1)
+			return Integer.class;
+		
+		return super.getColumnClass(columnIndex);
+	}
 
 	
 }
