@@ -2,14 +2,10 @@ package de.nasskappe.lc3.sim.maschine.cmds;
 
 import de.nasskappe.lc3.sim.maschine.CPU;
 
-public class Reserved implements ICommand {
+public class Reserved extends AbstractCommand {
 
 	@Override
 	public void execute(CPU cpu) {
-	}
-
-	@Override
-	public void init(short code) throws IllegalOpcodeException {
 	}
 
 	@Override

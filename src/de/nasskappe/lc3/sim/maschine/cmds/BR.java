@@ -4,7 +4,7 @@ import de.nasskappe.lc3.sim.maschine.CPU;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.Register.CC_Value;
 
-public class BR implements ICommand {
+public class BR extends AbstractCommand {
 
 	private boolean n;
 	private boolean z;
@@ -12,7 +12,9 @@ public class BR implements ICommand {
 	private short pcOffset;
 
 	@Override
-	public void init(short code) throws IllegalOpcodeException {
+	public void init(short code) {
+		super.init(code);
+		
 		n = (code & (1<<11)) != 0;
 		z = (code & (1<<10)) != 0;
 		p = (code & (1<<9)) != 0;

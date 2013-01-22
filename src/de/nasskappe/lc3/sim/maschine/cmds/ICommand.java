@@ -6,8 +6,14 @@ public interface ICommand {
 
 	void execute(CPU cpu);
 
-	void init(short code) throws IllegalOpcodeException;
+	void init(short code);
 
 	String getASM();
+	
+	short getCode();
+
+	boolean isStopBeforeExecute();
+	
+	void setStopBeforeExecute(boolean stopBeforeExecution);
 	
 }

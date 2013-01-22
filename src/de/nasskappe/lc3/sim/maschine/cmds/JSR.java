@@ -4,20 +4,23 @@ import de.nasskappe.lc3.sim.maschine.CPU;
 import de.nasskappe.lc3.sim.maschine.Register;
 
 
-public class JSR implements ICommand {
+public class JSR extends AbstractCommand {
 	
 	private short pcOffset;
 	private Register baseR;
 
 	@Override
-	public void init(short code) throws IllegalOpcodeException {
+	public void init(short code) {
+		super.init(code);
+		
 		int bit11 = (code & (1<<11));
 		if (bit11 == 0) {
-			if ((code & (3 << 9)) != 0)
-				throw new IllegalOpcodeException(code);
-			
-			if ((code & 0x3F) != 0)
-				throw new IllegalOpcodeException(code);
+			if ((code & (3 << 9)) != 0) {
+				setIllegal(true);
+			}
+			if ((code & 0x3F) != 0) {
+				setIllegal(true);
+			}
 			
 			int baseRByte = (code & (7 << 6)) >> 6;
 			baseR = Register.values()[baseRByte];

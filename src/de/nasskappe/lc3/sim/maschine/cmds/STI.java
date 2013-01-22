@@ -3,13 +3,15 @@ package de.nasskappe.lc3.sim.maschine.cmds;
 import de.nasskappe.lc3.sim.maschine.CPU;
 import de.nasskappe.lc3.sim.maschine.Register;
 
-public class STI implements ICommand {
+public class STI extends AbstractCommand {
 
 	private Register sr;
 	private short pcOffset;
 
 	@Override
-	public void init(short code) throws IllegalOpcodeException {
+	public void init(short code) {
+		super.init(code);
+		
 		int drByte = (code & (7 << 9)) >> 9;
 		sr = Register.values()[drByte];
 		

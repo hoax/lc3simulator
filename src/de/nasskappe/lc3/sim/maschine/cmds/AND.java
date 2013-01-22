@@ -3,7 +3,7 @@ package de.nasskappe.lc3.sim.maschine.cmds;
 import de.nasskappe.lc3.sim.maschine.CPU;
 import de.nasskappe.lc3.sim.maschine.Register;
 
-public class AND implements ICommand {
+public class AND extends  AbstractCommand {
 
 	private Register dr;
 	private Register sr1;
@@ -11,7 +11,9 @@ public class AND implements ICommand {
 	private short imm; // only used if sr2 is not null
 
 	@Override
-	public void init(short code) throws IllegalOpcodeException {
+	public void init(short code) {
+		super.init(code);
+		
 		int drByte = (code & 0x0E00) >> 9;
 		dr = Register.values()[drByte];
 		
@@ -20,9 +22,9 @@ public class AND implements ICommand {
 		
 		int registerOrImm = (code & 0x0020) >> 5;
 		if (registerOrImm == 0) {
-			if ((code & 0x0018) != 0)
-				throw new IllegalOpcodeException(code);
-			
+			if ((code & 0x0018) != 0) {
+				setIllegal(true);
+			}
 			imm = -1;
 			int sr2Byte = (code & 0x0007);
 			sr2 = Register.values()[sr2Byte];

@@ -3,21 +3,24 @@ package de.nasskappe.lc3.sim.maschine.cmds;
 import de.nasskappe.lc3.sim.maschine.CPU;
 import de.nasskappe.lc3.sim.maschine.Register;
 
-public class NOT implements ICommand {
+public class NOT extends AbstractCommand {
 
 	private Register dr;
 	private Register sr;
 
 	@Override
-	public void init(short code) throws IllegalOpcodeException {
+	public void init(short code) {
+		super.init(code);
+		
 		int drByte = (code & (7 << 9)) >> 9;
 		dr = Register.values()[drByte];
 		
 		int srByte = (code & (7 << 6)) >> 6;
 		sr = Register.values()[srByte];
 		
-		if ((code & 0x3F) != 0x3F)
-			throw new IllegalOpcodeException(code);
+		if ((code & 0x3F) != 0x3F) {
+			setIllegal(true);
+		}
 	}
 	
 	@Override
