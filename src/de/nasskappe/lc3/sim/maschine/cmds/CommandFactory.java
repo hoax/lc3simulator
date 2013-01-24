@@ -3,8 +3,6 @@ package de.nasskappe.lc3.sim.maschine.cmds;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.nasskappe.lc3.sim.maschine.Lc3Exception;
-
 public class CommandFactory {
 
 	private List<Class<? extends ICommand>> mapping = new ArrayList<>(16);
@@ -27,7 +25,7 @@ public class CommandFactory {
 		mapping.add(TRAP.class); // 1111
 	};
 	
-	public ICommand createCommand(short code) throws Lc3Exception {
+	public ICommand createCommand(short code) {
 		int cmdNo = (code & 0xF000) >> 12;
 		@SuppressWarnings("unchecked")
 		Class<ICommand> clazz = (Class<ICommand>) mapping.get(cmdNo);
@@ -38,7 +36,8 @@ public class CommandFactory {
 			
 			return cmd;
 		} catch (Exception e) {
-			throw new Lc3Exception(e);
+			//TODO handle exception
 		}
+		return null;
 	}
 }

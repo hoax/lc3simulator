@@ -2,6 +2,7 @@ package de.nasskappe.lc3.sim.maschine;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,11 +19,14 @@ public class CPU {
 	private CommandFactory cmdFactory;
 	private Set<ICPUListener> listeners;
 	
+	private Set<Integer> addressBreakpoints;
+	
 	public CPU() {
 		listeners = new HashSet<ICPUListener>();
 		cmdFactory = new CommandFactory();
 		mem = new Memory();
 		register = new HashMap<Register, Short>();
+		addressBreakpoints = new HashSet<>();
 
 		register.put(Register.R0, (short) 0);
 		register.put(Register.R1, (short) 0);
@@ -46,7 +50,7 @@ public class CPU {
 		}
 	}
 	
-	public ICommand step() throws Lc3Exception {
+	public ICommand step() {
 		Integer addr = getPC();
 		short code = readMemory(addr);
 		setRegister(Register.IR, code);
@@ -57,6 +61,30 @@ public class CPU {
 		fireInstructionExecuted(this, cmd);
 		
 		return cmd;
+	}
+	
+	public ICommand run() {
+		ICommand lastCmd = null;
+		while(!isBreakpointSetFor(getPC()) || lastCmd == null) {
+			lastCmd = step();
+		}
+		return lastCmd;
+	}
+	
+	public boolean isBreakpointSetFor(int pc) {
+		return addressBreakpoints.contains(pc);
+	}
+	
+	public Set<Integer> getAddressBreakpoints() {
+		return Collections.unmodifiableSet(addressBreakpoints);
+	}
+	
+	public boolean toggleAddressBreakpoint(Integer address) {
+		boolean isBreakpointSet = isBreakpointSetFor(address);
+
+		setAddressBreakpoint(address, !isBreakpointSet);
+		
+		return !isBreakpointSet;
 	}
 
 	private void fireInstructionExecuted(CPU cpu, ICommand cmd) {
@@ -125,4 +153,15 @@ public class CPU {
 			l.registerChanged(this, register, value);
 		}
 	}
+
+	public void setAddressBreakpoint(Integer address, Boolean aValue) {
+		if (aValue) {
+			addressBreakpoints.add(address);
+		} else {
+			addressBreakpoints.remove(address);
+		}
+		
+		fireMemoryChanged(this, address, readMemory(address));
+	}
+	
 }

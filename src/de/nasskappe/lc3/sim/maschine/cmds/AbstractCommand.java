@@ -5,7 +5,6 @@ import de.nasskappe.lc3.sim.maschine.CPU;
 public abstract class AbstractCommand implements ICommand {
 
 	private short code;
-	private boolean stopBeforeExecution;
 	private boolean isIllegal;
 
 	@Override
@@ -23,16 +22,6 @@ public abstract class AbstractCommand implements ICommand {
 	@Override
 	abstract public String getASM();
 
-	@Override
-	public boolean isStopBeforeExecute() {
-		return stopBeforeExecution;
-	}
-	
-	@Override
-	public void setStopBeforeExecute(boolean stopBeforeExecution) {
-		this.stopBeforeExecution = stopBeforeExecution;
-	}
-	
 	public boolean isIllegal() {
 		return isIllegal;
 	}

@@ -1,16 +1,16 @@
 package de.nasskappe.lc3.sim.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -28,12 +28,13 @@ import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
+import de.nasskappe.lc3.sim.gui.renderer.Binary16TableCellRenderer;
+import de.nasskappe.lc3.sim.gui.renderer.Hex16TableCellRenderer;
+import de.nasskappe.lc3.sim.gui.renderer.LabelTableCellRenderer;
 import de.nasskappe.lc3.sim.maschine.CPU;
 import de.nasskappe.lc3.sim.maschine.ICPUListener;
-import de.nasskappe.lc3.sim.maschine.Lc3Exception;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
@@ -128,18 +129,11 @@ public class MainWindow extends JFrame implements ICPUListener {
 		registerTable.setFillsViewportHeight(true);
 		registerTable.setModel(model);
 	
-		TableCellRenderer cellLabelRenderer = new DefaultTableCellRenderer() {
-			public Component getTableCellRendererComponent(JTable table, Object value,
-					boolean isSelected, boolean hasFocus, int row, int column) {
-				Component x = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-				x.setBackground(table.getTableHeader().getBackground());
-				x.setFont(x.getFont().deriveFont(Font.BOLD));
-				return x;
-			}
-		};
+		TableCellRenderer cellLabelRenderer = new LabelTableCellRenderer();
 		registerTable.getColumnModel().getColumn(0).setCellRenderer(cellLabelRenderer);
 		registerTable.getColumnModel().getColumn(2).setCellRenderer(cellLabelRenderer);
 		registerTable.getColumnModel().getColumn(4).setCellRenderer(cellLabelRenderer);
+		registerTable.setDefaultRenderer(Integer.class, new Hex16TableCellRenderer());
 		registerPanel.add(registerTable, BorderLayout.CENTER);
 		
 		JPanel panel = new JPanel();
@@ -167,10 +161,27 @@ public class MainWindow extends JFrame implements ICPUListener {
 		
 		codeTable = new JTable();
 		codeTable.setFillsViewportHeight(true);
-		CodeTableModel codeModel = new CodeTableModel();
+		CodeTableModel codeModel = new CodeTableModel(cpu);
 		cpu.addCpuListener(codeModel);
 		codeTable.setModel(codeModel);
+		codeTable.getColumnModel().getColumn(0).setCellRenderer(null);
+		codeTable.getColumnModel().getColumn(1).setCellRenderer(new Hex16TableCellRenderer());
+		codeTable.getColumnModel().getColumn(2).setCellRenderer(new Binary16TableCellRenderer());
+		codeTable.getColumnModel().getColumn(3).setCellRenderer(new Hex16TableCellRenderer());
+		codeTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					toggleBreakpointAtSelectedAddress();
+				}
+			}
+		});
 		scrollPane.setViewportView(codeTable);
+	}
+
+	protected void toggleBreakpointAtSelectedAddress() {
+		int selectedRow = codeTable.getSelectedRow();
+		cpu.toggleAddressBreakpoint(selectedRow);
 	}
 
 	protected void selectAndLoadFile() {
@@ -203,11 +214,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 	}
 
 	protected void stepToNextInstruction() {
-		try {
-			cpu.step();
-		} catch (Lc3Exception e) {
-			e.printStackTrace();
-		}
+		cpu.step();
 	}
 
 	@Override

@@ -12,8 +12,4 @@ public interface ICommand {
 	
 	short getCode();
 
-	boolean isStopBeforeExecute();
-	
-	void setStopBeforeExecute(boolean stopBeforeExecution);
-	
 }
