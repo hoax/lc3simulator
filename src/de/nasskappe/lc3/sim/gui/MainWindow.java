@@ -32,6 +32,7 @@ import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 
@@ -179,10 +180,10 @@ public class MainWindow extends JFrame implements ICPUListener {
 		codeTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
+				if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
 					toggleBreakpointAtSelectedAddress();
 				}
-				else if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 2) {
+				else if (SwingUtilities.isRightMouseButton(e) && e.getClickCount() == 2) {
 					int row = codeTable.rowAtPoint(e.getPoint());
 					cpu.setPC(row);
 				}
@@ -249,7 +250,6 @@ public class MainWindow extends JFrame implements ICPUListener {
 
 	@Override
 	public void instructionExecuted(CPU cpu, ICommand cmd) {
-		int row = cpu.getPC();
 		scrollToPC();
 	}
 
