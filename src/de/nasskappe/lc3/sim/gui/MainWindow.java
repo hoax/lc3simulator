@@ -9,13 +9,17 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,11 +30,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 
 import de.nasskappe.lc3.sim.gui.renderer.Binary16TableCellRenderer;
+import de.nasskappe.lc3.sim.gui.renderer.BreakpointTableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.Hex16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.LabelTableCellRenderer;
 import de.nasskappe.lc3.sim.maschine.CPU;
@@ -164,7 +170,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 		CodeTableModel codeModel = new CodeTableModel(cpu);
 		cpu.addCpuListener(codeModel);
 		codeTable.setModel(codeModel);
-		codeTable.getColumnModel().getColumn(0).setCellRenderer(null);
+		codeTable.getColumnModel().getColumn(0).setCellRenderer(new BreakpointTableCellRenderer(codeTable));
 		codeTable.getColumnModel().getColumn(1).setCellRenderer(new Hex16TableCellRenderer());
 		codeTable.getColumnModel().getColumn(2).setCellRenderer(new Binary16TableCellRenderer());
 		codeTable.getColumnModel().getColumn(3).setCellRenderer(new Hex16TableCellRenderer());
@@ -177,6 +183,16 @@ public class MainWindow extends JFrame implements ICPUListener {
 			}
 		});
 		scrollPane.setViewportView(codeTable);
+		
+		// ctrl-B toggles breakpoint
+		codeTable.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+			.put(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK), "toggleBreakpoint");
+		codeTable.getActionMap().put("toggleBreakpoint", new AbstractAction("toggleBreakpoint") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				toggleBreakpointAtSelectedAddress();
+			}
+		});
 	}
 
 	protected void toggleBreakpointAtSelectedAddress() {
