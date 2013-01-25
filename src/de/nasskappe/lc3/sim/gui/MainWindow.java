@@ -13,7 +13,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -32,6 +31,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
 
+import de.nasskappe.lc3.sim.gui.action.DebuggerRunAction;
+import de.nasskappe.lc3.sim.gui.action.DebuggerStepIntoAction;
+import de.nasskappe.lc3.sim.gui.action.DebuggerStepOverAction;
+import de.nasskappe.lc3.sim.gui.action.DebuggerStepReturnAction;
 import de.nasskappe.lc3.sim.gui.action.LoadFileAction;
 import de.nasskappe.lc3.sim.gui.renderer.Binary16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.BreakpointTableCellRenderer;
@@ -49,6 +52,10 @@ public class MainWindow extends JFrame implements ICPUListener {
 	private CPU cpu;
 	private JTable codeTable;
 	private LoadFileAction loadFileAction;
+	private DebuggerRunAction runAction;
+	private DebuggerStepIntoAction stepIntoAction;
+	private DebuggerStepOverAction stepOverAction;
+	private DebuggerStepReturnAction stepReturnAction;
 
 	/**
 	 * Launch the application.
@@ -79,6 +86,10 @@ public class MainWindow extends JFrame implements ICPUListener {
 		setBounds(100, 100, 450, 300);
 		
 		loadFileAction = new LoadFileAction(this, cpu);
+		runAction = new DebuggerRunAction(cpu);
+		stepIntoAction = new DebuggerStepIntoAction(cpu);
+		stepOverAction = new DebuggerStepOverAction(cpu);
+		stepReturnAction = new DebuggerStepReturnAction(cpu);
 		
 		JMenuBar menuBar = createMenuBar();
 		setJMenuBar(menuBar);
@@ -153,11 +164,17 @@ public class MainWindow extends JFrame implements ICPUListener {
 	private JMenuBar createMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
 		
+		createFileMenu(menuBar);
+		createDebugMenu(menuBar);
+
+		return menuBar;
+	}
+	
+	private void createFileMenu(JMenuBar menuBar) {
 		JMenu mnFile = new JMenu("File");
 		menuBar.add(mnFile);
 		
-		JMenuItem mntmLoadobjFile = new JMenuItem("Load file ...");
-		mntmLoadobjFile.setAction(loadFileAction);
+		JMenuItem mntmLoadobjFile = new JMenuItem(loadFileAction);
 		mnFile.add(mntmLoadobjFile);
 		
 		JSeparator separator = new JSeparator();
@@ -165,8 +182,23 @@ public class MainWindow extends JFrame implements ICPUListener {
 		
 		JMenuItem mntmExit = new JMenuItem("Exit");
 		mnFile.add(mntmExit);
+	}
+	
+	private void createDebugMenu(JMenuBar menuBar) {
+		JMenu mnFile = new JMenu("Debug");
+		menuBar.add(mnFile);
+		
+		JMenuItem runBtn = new JMenuItem(runAction);
+		mnFile.add(runBtn);
+		
+		JMenuItem stepIntoBtn = new JMenuItem(stepIntoAction);
+		mnFile.add(stepIntoBtn);
 
-		return menuBar;
+		JMenuItem stepOverBtn = new JMenuItem(stepOverAction);
+		mnFile.add(stepOverBtn);
+
+		JMenuItem stepReturnBtn = new JMenuItem(stepReturnAction);
+		mnFile.add(stepReturnBtn);
 	}
 
 	private JTable createRegisterTable() {
@@ -238,24 +270,20 @@ public class MainWindow extends JFrame implements ICPUListener {
 		JSeparator separator_1 = new JSeparator();
 		toolBar.add(separator_1);
 		
-		JButton btnRun = new JButton();
-		btnRun.setToolTipText("run");
-		btnRun.setIcon(new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/run.gif")));
+		JButton btnRun = new JButton(runAction);
+		btnRun.setHideActionText(true);
 		toolBar.add(btnRun);
 		
-		JButton btnStepInto = new JButton();
-		btnStepInto.setToolTipText("step into");
-		btnStepInto.setIcon(new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/stepinto.gif")));
+		JButton btnStepInto = new JButton(stepIntoAction);
+		btnStepInto.setHideActionText(true);
 		toolBar.add(btnStepInto);
 		
-		JButton btnStepOver = new JButton();
-		btnStepOver.setToolTipText("step over");
-		btnStepOver.setIcon(new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/stepover.gif")));
+		JButton btnStepOver = new JButton(stepOverAction);
+		btnStepOver.setHideActionText(true);
 		toolBar.add(btnStepOver);
 		
-		JButton btnStepReturn = new JButton();
-		btnStepReturn.setToolTipText("step return");
-		btnStepReturn.setIcon(new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/stepreturn.gif")));
+		JButton btnStepReturn = new JButton(stepReturnAction);
+		btnStepReturn.setHideActionText(true);
 		toolBar.add(btnStepReturn);
 		
 		return toolBar;

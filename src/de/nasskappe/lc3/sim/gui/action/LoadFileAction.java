@@ -32,7 +32,6 @@ public class LoadFileAction extends AbstractAction {
 		putValue(SMALL_ICON, icon);
 		putValue(ACTION_COMMAND_KEY, "loadFile");
 		putValue(MNEMONIC_KEY, (int)'O');
-		putValue("hideActionText", true);
 	}
 	
 	@Override
