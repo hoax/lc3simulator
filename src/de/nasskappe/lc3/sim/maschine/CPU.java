@@ -63,6 +63,23 @@ public class CPU {
 		return cmd;
 	}
 	
+	public ICommand stepOver() {
+		ICommand lastCmd = null;
+		int oldPC = getPC();
+		while((oldPC + 1) != getPC() && !isBreakpointSetFor(getPC())) {
+			lastCmd = step();
+		}
+		return lastCmd;
+	}
+
+	public ICommand stepReturn() {
+		ICommand lastCmd = null;
+		while((!isBreakpointSetFor(getPC()) || lastCmd == null) && (lastCmd == null || !lastCmd.getASM().startsWith("RET"))) {
+			lastCmd = step();
+		}
+		return lastCmd;
+	}
+	
 	public ICommand run() {
 		ICommand lastCmd = null;
 		while(!isBreakpointSetFor(getPC()) || lastCmd == null) {
@@ -166,5 +183,5 @@ public class CPU {
 		
 		fireMemoryChanged(this, address, readMemory(address));
 	}
-	
+
 }
