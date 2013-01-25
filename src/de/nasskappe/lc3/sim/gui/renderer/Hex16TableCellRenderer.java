@@ -4,14 +4,20 @@ import java.awt.Component;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 
-public class Hex16TableCellRenderer extends DefaultTableCellRenderer {
+import de.nasskappe.lc3.sim.maschine.CPU;
+
+public class Hex16TableCellRenderer extends DefaultCodeTableCellRenderer {
 
 	private static final long serialVersionUID = -4664007369311751307L;
 
+	public Hex16TableCellRenderer(CPU cpu) {
+		super(cpu);
+	}
+	
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
+
 		Component x = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
 		if (value instanceof Number) {

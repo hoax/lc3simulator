@@ -62,7 +62,7 @@ public class RegisterTableModel extends AbstractTableModel implements ICPUListen
 	}
 
 	@Override
-	public void registerChanged(CPU cpu, Register r, short value) {
+	public void registerChanged(CPU cpu, Register r, short oldValue, short value) {
 		this.cpu = cpu;
 		fireTableDataChanged();
 	}

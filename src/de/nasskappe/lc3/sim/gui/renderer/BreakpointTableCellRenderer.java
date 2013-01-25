@@ -6,13 +6,15 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 
-public class BreakpointTableCellRenderer extends DefaultTableCellRenderer {
+import de.nasskappe.lc3.sim.maschine.CPU;
+
+public class BreakpointTableCellRenderer extends DefaultCodeTableCellRenderer {
 
 	private ImageIcon breakpointImage;
 
-	public BreakpointTableCellRenderer(JTable table) {
+	public BreakpointTableCellRenderer(CPU cpu, JTable table) {
+		super(cpu);
 		breakpointImage = new ImageIcon(getClass().getResource("breakpoint.png"));
 		int height = table.getRowHeight() - 4;
 		breakpointImage =  new ImageIcon(breakpointImage.getImage().getScaledInstance(height, height, 0));

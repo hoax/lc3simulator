@@ -102,8 +102,11 @@ public class CPU {
 	}
 	
 	public void setRegister(Register register, Short value) {
+		Short oldValue = this.register.get(register);
 		this.register.put(register, value);
-		fireRegisterChanged(register, value);
+		if (oldValue == null)
+			oldValue = 0;
+		fireRegisterChanged(register, oldValue, value);
 	}
 	
 	public Short getRegister(Register register) {
@@ -148,9 +151,9 @@ public class CPU {
 		return listeners.remove(listener);
 	}
 	
-	private void fireRegisterChanged(Register register, short value) {
+	private void fireRegisterChanged(Register register, short oldValue, short value) {
 		for(ICPUListener l : listeners) {
-			l.registerChanged(this, register, value);
+			l.registerChanged(this, register, oldValue, value);
 		}
 	}
 

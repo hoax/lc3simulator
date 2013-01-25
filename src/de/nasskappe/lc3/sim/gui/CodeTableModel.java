@@ -75,7 +75,14 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 	}
 
 	@Override
-	public void registerChanged(CPU cpu, Register r, short value) {
+	public void registerChanged(CPU cpu, Register r, short oldValue, short value) {
+		if (r == Register.PC) {
+			int pc = ((int)value) & 0xffff;
+			int oldPC = ((int)oldValue) & 0xffff;
+			
+			fireTableRowsUpdated(oldPC, oldPC);
+			fireTableRowsUpdated(pc, pc);
+		}
 	}
 
 	@Override

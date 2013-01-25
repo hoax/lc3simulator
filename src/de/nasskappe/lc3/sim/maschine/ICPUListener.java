@@ -4,7 +4,7 @@ import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
 public interface ICPUListener {
 
-	void registerChanged(CPU cpu, Register r, short value);
+	void registerChanged(CPU cpu, Register r, short oldValue, short value);
 	
 	void instructionExecuted(CPU cpu, ICommand cmd);
 

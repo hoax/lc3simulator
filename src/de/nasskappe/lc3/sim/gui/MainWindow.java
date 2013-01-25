@@ -127,7 +127,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 		
 		RegisterTableModel model = new RegisterTableModel();
 		cpu.addCpuListener(model);
-		model.registerChanged(cpu, Register.IR, (short) 0);
+		model.registerChanged(cpu, Register.IR, (short) 0, (short) 0);
 		
 		registerTable = new JTable();
 		registerTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -139,7 +139,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 		registerTable.getColumnModel().getColumn(0).setCellRenderer(cellLabelRenderer);
 		registerTable.getColumnModel().getColumn(2).setCellRenderer(cellLabelRenderer);
 		registerTable.getColumnModel().getColumn(4).setCellRenderer(cellLabelRenderer);
-		registerTable.setDefaultRenderer(Integer.class, new Hex16TableCellRenderer());
+		registerTable.setDefaultRenderer(Integer.class, new Hex16TableCellRenderer(null));
 		registerPanel.add(registerTable, BorderLayout.CENTER);
 		
 		JPanel panel = new JPanel();
@@ -166,19 +166,25 @@ public class MainWindow extends JFrame implements ICPUListener {
 		codePanel.add(scrollPane);
 		
 		codeTable = new JTable();
+		codeTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		codeTable.setRowSelectionAllowed(true);
 		codeTable.setFillsViewportHeight(true);
 		CodeTableModel codeModel = new CodeTableModel(cpu);
 		cpu.addCpuListener(codeModel);
 		codeTable.setModel(codeModel);
-		codeTable.getColumnModel().getColumn(0).setCellRenderer(new BreakpointTableCellRenderer(codeTable));
-		codeTable.getColumnModel().getColumn(1).setCellRenderer(new Hex16TableCellRenderer());
-		codeTable.getColumnModel().getColumn(2).setCellRenderer(new Binary16TableCellRenderer());
-		codeTable.getColumnModel().getColumn(3).setCellRenderer(new Hex16TableCellRenderer());
+		codeTable.getColumnModel().getColumn(0).setCellRenderer(new BreakpointTableCellRenderer(cpu, codeTable));
+		codeTable.getColumnModel().getColumn(1).setCellRenderer(new Hex16TableCellRenderer(cpu));
+		codeTable.getColumnModel().getColumn(2).setCellRenderer(new Binary16TableCellRenderer(cpu));
+		codeTable.getColumnModel().getColumn(3).setCellRenderer(new Hex16TableCellRenderer(cpu));
 		codeTable.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (e.getClickCount() == 2) {
+				if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2) {
 					toggleBreakpointAtSelectedAddress();
+				}
+				else if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 2) {
+					int row = codeTable.rowAtPoint(e.getPoint());
+					cpu.setPC(row);
 				}
 			}
 		});
@@ -193,6 +199,8 @@ public class MainWindow extends JFrame implements ICPUListener {
 				toggleBreakpointAtSelectedAddress();
 			}
 		});
+		
+		scrollToPC();
 	}
 
 	protected void toggleBreakpointAtSelectedAddress() {
@@ -226,6 +234,8 @@ public class MainWindow extends JFrame implements ICPUListener {
 	private void scrollToPC() {
 		int row = cpu.getPC();
 		Rectangle rect = codeTable.getCellRect(row, 0, true);
+		rect.y = rect.y - 2* rect.height;
+		rect.height = 5 * rect.height;
 		codeTable.scrollRectToVisible(rect);
 	}
 
@@ -234,13 +244,12 @@ public class MainWindow extends JFrame implements ICPUListener {
 	}
 
 	@Override
-	public void registerChanged(CPU cpu, Register r, short value) {
+	public void registerChanged(CPU cpu, Register r, short oldValue, short value) {
 	}
 
 	@Override
 	public void instructionExecuted(CPU cpu, ICommand cmd) {
 		int row = cpu.getPC();
-		codeTable.getSelectionModel().setSelectionInterval(row, row);
 		scrollToPC();
 	}
 
