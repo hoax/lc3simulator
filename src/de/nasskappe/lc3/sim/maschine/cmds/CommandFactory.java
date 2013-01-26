@@ -25,14 +25,14 @@ public class CommandFactory {
 		mapping.add(TRAP.class); // 1111
 	};
 	
-	public ICommand createCommand(short code) {
+	public ICommand createCommand(short code, int codePosition) {
 		int cmdNo = (code & 0xF000) >> 12;
 		@SuppressWarnings("unchecked")
 		Class<ICommand> clazz = (Class<ICommand>) mapping.get(cmdNo);
 		try {
 			ICommand cmd = clazz.newInstance();
-
 			cmd.init(code);
+			cmd.setCodePosition(codePosition);
 			
 			return cmd;
 		} catch (Exception e) {

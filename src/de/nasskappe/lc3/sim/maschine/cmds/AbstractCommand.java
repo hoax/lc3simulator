@@ -6,6 +6,7 @@ public abstract class AbstractCommand implements ICommand {
 
 	private short code;
 	private boolean isIllegal;
+	private int codePosition;
 
 	@Override
 	abstract public void execute(CPU cpu);
@@ -29,4 +30,14 @@ public abstract class AbstractCommand implements ICommand {
 	public void setIllegal(boolean isIllegal) {
 		this.isIllegal = isIllegal;
 	}
+
+	@Override
+	public int getCodePosition() {
+		return codePosition;
+	}
+	
+	public void setCodePosition(int codePosition) {
+		this.codePosition = codePosition;
+	}
+
 }

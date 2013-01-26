@@ -13,5 +13,7 @@ public interface ICommand {
 	short getCode();
 	
 	Object accept(ICommandVisitor visitor);
-
+	
+	int getCodePosition();
+	void setCodePosition(int codePosition);
 }

@@ -54,7 +54,7 @@ public class CPU {
 		Integer addr = getPC();
 		short code = readMemory(addr);
 		setRegister(Register.IR, code);
-		ICommand cmd = cmdFactory.createCommand((short)code);
+		ICommand cmd = cmdFactory.createCommand((short)code, addr);
 		setRegister(Register.PC, (short) (addr + 1));
 
 		cmd.execute(this);

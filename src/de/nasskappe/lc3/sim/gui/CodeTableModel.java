@@ -18,6 +18,8 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 		"", "address", "binary", "hex", "ASM"
 	};
 	
+	private final static BR nop = new BR();
+	
 	private Map<Integer, ICommand> row2cmd = new HashMap<Integer, ICommand>(128);
 	private CommandFactory factory = new CommandFactory();
 	private CPU cpu;
@@ -50,7 +52,7 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 			case 1: return rowIndex;
 			case 2: return 0;
 			case 3: return 0;
-			case 4: return "NOP";
+			case 4: return nop;
 			}
 		} else {
 			switch(columnIndex) {
@@ -58,7 +60,7 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 			case 1: return rowIndex;
 			case 2: return cmd.getCode();
 			case 3: return cmd.getCode();
-			case 4: return cmd.getASM(); 
+			case 4: return cmd; 
 			}
 		}
 		return null;
@@ -100,7 +102,7 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 
 	@Override
 	public void memoryChanged(CPU cpu, int addr, short value) {
-		ICommand cmd = factory.createCommand(value);
+		ICommand cmd = factory.createCommand(value, addr);
 		row2cmd.put(addr, cmd);
 		fireTableRowsUpdated(addr, addr);
 	}
