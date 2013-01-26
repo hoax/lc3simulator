@@ -2,6 +2,7 @@ package de.nasskappe.lc3.sim.gui.renderer;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -36,6 +37,7 @@ public class DefaultCodeTableCellRenderer extends DefaultTableCellRenderer {
 			comp.setBackground(PC_COLOR);
 		}
 		
+		setFont(new Font("Courier New", Font.PLAIN, getFont().getSize()));
 		return comp;
 	}
 	
