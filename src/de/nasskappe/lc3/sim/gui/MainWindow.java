@@ -43,9 +43,9 @@ import de.nasskappe.lc3.sim.gui.action.DebuggerStepIntoAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepOverAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepReturnAction;
 import de.nasskappe.lc3.sim.gui.action.LoadFileAction;
+import de.nasskappe.lc3.sim.gui.renderer.ASMTableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.Binary16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.BreakpointTableCellRenderer;
-import de.nasskappe.lc3.sim.gui.renderer.DefaultCodeTableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.Hex16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.LabelTableCellRenderer;
 import de.nasskappe.lc3.sim.maschine.CPU;
@@ -386,7 +386,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 		table.getColumnModel().getColumn(1).setCellRenderer(new Hex16TableCellRenderer(cpu));
 		table.getColumnModel().getColumn(2).setCellRenderer(new Binary16TableCellRenderer(cpu));
 		table.getColumnModel().getColumn(3).setCellRenderer(new Hex16TableCellRenderer(cpu));
-		table.getColumnModel().getColumn(4).setCellRenderer(new DefaultCodeTableCellRenderer(cpu));
+		table.getColumnModel().getColumn(4).setCellRenderer(new ASMTableCellRenderer(cpu));
 		
 		table.getColumnModel().getColumn(0).setResizable(false);
 		table.getColumnModel().getColumn(0).setMaxWidth(22);

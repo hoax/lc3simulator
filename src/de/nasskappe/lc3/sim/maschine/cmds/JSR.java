@@ -59,7 +59,11 @@ public class JSR extends AbstractCommand {
 
 	@Override
 	public String getASM() {
-		return "JSR";
+		if (baseR == null) {
+			return "JSR";
+		} else {
+			return "JSRR";
+		}
 	}
 
 	@Override
