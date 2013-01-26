@@ -103,9 +103,8 @@ public class JNumberField extends JTextField {
 			}
 		});
 		
-		formatter = decimalFormatter;
-		
-		decItem.setSelected(true);
+		formatter = hexFormatter;
+		hexItem.setSelected(true);
 	}
 
 	public void setNumber(int value) {
