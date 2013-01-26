@@ -49,4 +49,9 @@ public class STR extends AbstractCommand {
 		return "STR";
 	}
 	
+	@Override
+	public Object accept(ICommandVisitor visitor) {
+		return visitor.visit(this);
+	}
+	
 }

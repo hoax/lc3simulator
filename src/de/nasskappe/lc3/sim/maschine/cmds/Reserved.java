@@ -13,4 +13,9 @@ public class Reserved extends AbstractCommand {
 		return "---";
 	}
 
+	@Override
+	public Object accept(ICommandVisitor visitor) {
+		return visitor.visit(this);
+	}
+
 }

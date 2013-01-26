@@ -40,4 +40,10 @@ public class STI extends AbstractCommand {
 	public String getASM() {
 		return "STI";
 	}
+	
+	@Override
+	public Object accept(ICommandVisitor visitor) {
+		return visitor.visit(this);
+	}
+
 }

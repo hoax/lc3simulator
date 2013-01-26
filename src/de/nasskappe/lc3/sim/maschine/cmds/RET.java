@@ -25,4 +25,9 @@ public class RET extends AbstractCommand {
 		return "RET";
 	}
 
+	@Override
+	public Object accept(ICommandVisitor visitor) {
+		return visitor.visit(this);
+	}
+
 }

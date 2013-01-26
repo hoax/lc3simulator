@@ -50,4 +50,9 @@ public class LDR extends AbstractCommand {
 		return "LDR";
 	}
 	
+	@Override
+	public Object accept(ICommandVisitor visitor) {
+		return visitor.visit(this);
+	}
+
 }

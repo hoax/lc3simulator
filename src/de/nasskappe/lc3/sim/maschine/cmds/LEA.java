@@ -40,4 +40,9 @@ public class LEA extends AbstractCommand {
 		return "LEA";
 	}
 
+	@Override
+	public Object accept(ICommandVisitor visitor) {
+		return visitor.visit(this);
+	}
+
 }

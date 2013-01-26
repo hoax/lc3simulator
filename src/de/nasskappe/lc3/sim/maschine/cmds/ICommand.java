@@ -11,5 +11,7 @@ public interface ICommand {
 	String getASM();
 	
 	short getCode();
+	
+	Object accept(ICommandVisitor visitor);
 
 }

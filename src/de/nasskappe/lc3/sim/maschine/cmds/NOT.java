@@ -42,6 +42,10 @@ public class NOT extends AbstractCommand {
 	@Override
 	public String getASM() {
 		return "NOT";
-	}
+	}	@Override
 	
+	public Object accept(ICommandVisitor visitor) {
+		return visitor.visit(this);
+	}
+
 }

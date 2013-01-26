@@ -23,4 +23,9 @@ public class RTI extends AbstractCommand {
 		return "RTI";
 	}
 
+	@Override
+	public Object accept(ICommandVisitor visitor) {
+		return visitor.visit(this);
+	}
+
 }

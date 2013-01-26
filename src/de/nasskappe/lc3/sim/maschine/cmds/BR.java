@@ -57,4 +57,9 @@ public class BR extends AbstractCommand {
 		return "BR";
 	}
 	
+	@Override
+	public Object accept(ICommandVisitor visitor) {
+		return visitor.visit(this);
+	}
+
 }

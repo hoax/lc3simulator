@@ -70,4 +70,8 @@ public class AND extends  AbstractCommand {
 		return "AND";
 	}
 	
+	@Override
+	public Object accept(ICommandVisitor visitor) {
+		return visitor.visit(this);
+	}
 }

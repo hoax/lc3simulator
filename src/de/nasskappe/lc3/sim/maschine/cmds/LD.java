@@ -41,4 +41,10 @@ public class LD extends AbstractCommand {
 	public String getASM() {
 		return "LD";
 	}
+
+	@Override
+	public Object accept(ICommandVisitor visitor) {
+		return visitor.visit(this);
+	}
+
 }
