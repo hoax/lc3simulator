@@ -21,7 +21,7 @@ public class Hex16TableCellRenderer extends DefaultCodeTableCellRenderer {
 		Component x = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
 		if (value instanceof Number) {
-			String hexString = String.format("0x%04x", ((Number)value).intValue());
+			String hexString = String.format("0x%04x", ((Number)value).intValue() & 0xFFFF);
 			((JLabel)x).setText(hexString);
 		}
 		
