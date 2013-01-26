@@ -4,7 +4,7 @@ public class HexFormatter implements IValueFormatter {
 
 	@Override
 	public String format(int value) {
-		return String.format("0x04x", value);
+		return String.format("0x%04x", value);
 	}
 
 }

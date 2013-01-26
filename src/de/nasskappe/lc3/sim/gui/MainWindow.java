@@ -2,6 +2,7 @@ package de.nasskappe.lc3.sim.gui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -28,7 +29,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
@@ -43,17 +43,15 @@ import de.nasskappe.lc3.sim.gui.action.DebuggerStepIntoAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepOverAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepReturnAction;
 import de.nasskappe.lc3.sim.gui.action.LoadFileAction;
-import de.nasskappe.lc3.sim.gui.formatter.BinaryFormatter;
-import de.nasskappe.lc3.sim.gui.formatter.IValueFormatter;
 import de.nasskappe.lc3.sim.gui.renderer.Binary16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.BreakpointTableCellRenderer;
+import de.nasskappe.lc3.sim.gui.renderer.DefaultCodeTableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.Hex16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.LabelTableCellRenderer;
 import de.nasskappe.lc3.sim.maschine.CPU;
 import de.nasskappe.lc3.sim.maschine.ICPUListener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
-import java.awt.Font;
 
 public class MainWindow extends JFrame implements ICPUListener {
 
@@ -66,12 +64,10 @@ public class MainWindow extends JFrame implements ICPUListener {
 	private DebuggerStepIntoAction stepIntoAction;
 	private DebuggerStepOverAction stepOverAction;
 	private DebuggerStepReturnAction stepReturnAction;
-	private JTextField currentValueField;
+	private JNumberField currentValueField;
 	private JButton btnGo;
 	private JComboBox<String> currentAddressBox;
 	
-	private IValueFormatter currentValueFormatter = new BinaryFormatter();
-
 	/**
 	 * Launch the application.
 	 */
@@ -221,7 +217,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 		gbc_lblValue.gridy = 1;
 		panel.add(lblValue, gbc_lblValue);
 		
-		currentValueField = new JTextField();
+		currentValueField = new JNumberField();
 		currentValueField.setFont(new Font("Courier New", Font.PLAIN, currentValueField.getFont().getSize()));
 		GridBagConstraints gbc_currentValueField = new GridBagConstraints();
 		gbc_currentValueField.fill = GridBagConstraints.HORIZONTAL;
@@ -390,6 +386,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 		table.getColumnModel().getColumn(1).setCellRenderer(new Hex16TableCellRenderer(cpu));
 		table.getColumnModel().getColumn(2).setCellRenderer(new Binary16TableCellRenderer(cpu));
 		table.getColumnModel().getColumn(3).setCellRenderer(new Hex16TableCellRenderer(cpu));
+		table.getColumnModel().getColumn(4).setCellRenderer(new DefaultCodeTableCellRenderer(cpu));
 		
 		table.getColumnModel().getColumn(0).setResizable(false);
 		table.getColumnModel().getColumn(0).setMaxWidth(22);
@@ -447,9 +444,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 		if (row != -1) {
 			int value = ((int)cpu.readMemory(row)) & 0xffff;
 			
-			String str = currentValueFormatter.format(value);
-			
-			currentValueField.setText(str);
+			currentValueField.setNumber(value);
 		}
 	}
 
