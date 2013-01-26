@@ -13,6 +13,10 @@ import de.nasskappe.lc3.sim.maschine.cmds.CommandFactory;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
 public class CodeTableModel extends AbstractTableModel implements ICPUListener {
+
+	private final static String[] COLUMNS = {
+		"", "address", "binary", "hex", "ASM"
+	};
 	
 	private Map<Integer, ICommand> row2cmd = new HashMap<Integer, ICommand>(128);
 	private CommandFactory factory = new CommandFactory();
@@ -23,13 +27,18 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 	}
 	
 	@Override
+	public String getColumnName(int column) {
+		return COLUMNS[column];
+	}
+	
+	@Override
 	public int getRowCount() {
 		return 0xFFFF;
 	}
 
 	@Override
 	public int getColumnCount() {
-		return 4;
+		return 5;
 	}
 
 	@Override
