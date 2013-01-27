@@ -16,12 +16,14 @@ import de.nasskappe.lc3.sim.maschine.CPU;
 
 public class LoadFileAction extends AbstractAction {
 
-	JFileChooser fc = new JFileChooser();
+	JFileChooser fc;
 	Window window;
 	private CPU cpu;
 	private Icon icon;
 	
 	public LoadFileAction(Window parentWindow, CPU cpu) {
+		fc = new JFileChooser(new File("."));
+		
 		window = parentWindow;
 		this.cpu = cpu;
 		
