@@ -11,17 +11,29 @@ import java.util.Set;
 import de.nasskappe.lc3.sim.maschine.Register.CC_Value;
 import de.nasskappe.lc3.sim.maschine.cmds.CommandFactory;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
+import de.nasskappe.lc3.sim.maschine.cmds.JSR;
+import de.nasskappe.lc3.sim.maschine.cmds.RET;
+import de.nasskappe.lc3.sim.maschine.cmds.RTI;
+import de.nasskappe.lc3.sim.maschine.cmds.TRAP;
 
 public class CPU {
-
+	private final static int BIT_P = 0;
+	private final static int BIT_Z = 1;
+	private final static int BIT_N = 2;
+	private final static int BITS_PRIORITY = 8;
+	private final static int BIT_PRIVILEGE = 15;
+	
 	private Memory mem;
 	private Map<Register, Short> register;
+	private int currentPriority;
+	
 	private CommandFactory cmdFactory;
 	private Set<ICPUListener> listeners;
-	
 	private Set<Integer> addressBreakpoints;
 	
+	
 	public CPU() {
+		currentPriority = 0;
 		listeners = new HashSet<ICPUListener>();
 		cmdFactory = new CommandFactory();
 		mem = new Memory();
@@ -58,23 +70,30 @@ public class CPU {
 		setRegister(Register.PC, (short) (addr + 1));
 
 		cmd.execute(this);
+		
 		fireInstructionExecuted(this, cmd);
 		
 		return cmd;
 	}
 	
 	public ICommand stepOver() {
-		ICommand lastCmd = null;
 		int oldPC = getPC();
-		while((oldPC + 1) != getPC() && !isBreakpointSetFor(getPC())) {
-			lastCmd = step();
+		
+		ICommand lastCmd = step();
+		if (lastCmd.getClass() == JSR.class
+				|| lastCmd.getClass() == TRAP.class) {
+			while((oldPC + 1) != getPC() && !isBreakpointSetFor(getPC())) {
+				lastCmd = step();
+			}
 		}
+		
 		return lastCmd;
 	}
 
 	public ICommand stepReturn() {
 		ICommand lastCmd = null;
-		while((!isBreakpointSetFor(getPC()) || lastCmd == null) && (lastCmd == null || !lastCmd.getASM().startsWith("RET"))) {
+		while((!isBreakpointSetFor(getPC()) || lastCmd == null) 
+				&& (lastCmd == null || !(lastCmd.getClass() == RET.class || lastCmd.getClass() == RTI.class))) {
 			lastCmd = step();
 		}
 		return lastCmd;
@@ -138,6 +157,7 @@ public class CPU {
 			ccValue = Register.CC_Value.N;
 		
 		setRegister(Register.CC, (short) ccValue.ordinal());
+		updatePSR();
 	}
 	
 	public CC_Value getCC() {
@@ -182,6 +202,20 @@ public class CPU {
 		}
 		
 		fireMemoryChanged(this, address, readMemory(address));
+	}
+	
+	public void updatePSR() {
+		short psr = 0 << BIT_PRIVILEGE; // usermode
+		psr |= currentPriority << BITS_PRIORITY;
+		psr |= (bool2bit(getCC() == CC_Value.N)) << BIT_N;
+		psr |= (bool2bit(getCC() == CC_Value.P)) << BIT_P;
+		psr |= (bool2bit(getCC() == CC_Value.Z)) << BIT_Z;
+		
+		setRegister(Register.PSR, psr);
+	}
+	
+	private int bool2bit(boolean v) {
+		return (v) ? 1 : 0;
 	}
 
 }
