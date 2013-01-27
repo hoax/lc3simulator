@@ -28,6 +28,12 @@ public class RegisterTableModel extends AbstractTableModel implements ICPUListen
 	}
 	
 	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex) {
+		return (columnIndex % 2 == 1) 
+				&& !(rowIndex >= 2 && columnIndex == 5);
+	}
+	
+	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		if (columnIndex == 0 || columnIndex == 2 || columnIndex == 4) {
 			return LABELS[columnIndex/2][rowIndex];
@@ -59,6 +65,66 @@ public class RegisterTableModel extends AbstractTableModel implements ICPUListen
 			}
 		}
 		return null;
+	}
+	
+	@Override
+	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+		Number value = (Number) aValue;
+		if (columnIndex == 1) {
+			switch(rowIndex) {
+			case 0 : 
+				cpu.setRegister(Register.R0, value.shortValue());
+				break;
+				
+			case 1 : 
+				cpu.setRegister(Register.R1, value.shortValue());
+				break;
+				
+			case 2 : 
+				cpu.setRegister(Register.R2, value.shortValue());
+				break;
+				
+			case 3 : 
+				cpu.setRegister(Register.R3, value.shortValue());
+				break;
+			}
+		} else if (columnIndex == 3) {
+			switch(rowIndex) {
+			case 0 : 
+				cpu.setRegister(Register.R4, value.shortValue());
+				break;
+				
+			case 1 : 
+				cpu.setRegister(Register.R5, value.shortValue());
+				break;
+				
+			case 2 : 
+				cpu.setRegister(Register.R6, value.shortValue());
+				break;
+				
+			case 3 : 
+				cpu.setRegister(Register.R7, value.shortValue());
+				break;
+			}
+		} else if (columnIndex == 5) {
+			switch(rowIndex) {
+			case 0 : 
+				cpu.setRegister(Register.PSR, value.shortValue());
+				break;
+				
+			case 1 : 
+				cpu.setPC(value.intValue() & 0xffff);
+				break;
+				
+			case 2 : 
+				cpu.setRegister(Register.IR, value.shortValue());
+				break;
+				
+			case 3 : 
+				cpu.getCC();
+				break;
+			}
+		}
 	}
 
 	@Override

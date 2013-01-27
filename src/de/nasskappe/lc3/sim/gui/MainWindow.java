@@ -15,7 +15,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractAction;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -43,6 +42,7 @@ import de.nasskappe.lc3.sim.gui.action.DebuggerStepIntoAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepOverAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepReturnAction;
 import de.nasskappe.lc3.sim.gui.action.LoadFileAction;
+import de.nasskappe.lc3.sim.gui.editor.NumberCellEditor;
 import de.nasskappe.lc3.sim.gui.renderer.ASMTableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.Binary16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.BreakpointTableCellRenderer;
@@ -67,6 +67,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 	private JNumberField currentValueField;
 	private JButton btnGo;
 	private JComboBox<String> currentAddressBox;
+	private HexNumberComboBoxModel addressModel;
 	
 	/**
 	 * Launch the application.
@@ -186,9 +187,9 @@ public class MainWindow extends JFrame implements ICPUListener {
 		gbc_lblCurrentAddress.gridy = 0;
 		panel.add(lblCurrentAddress, gbc_lblCurrentAddress);
 		
-		currentAddressBox = new JComboBox<String>();
+		addressModel = new HexNumberComboBoxModel();
+		currentAddressBox = new JComboBox<String>(addressModel);
 		currentAddressBox.setEditable(true);
-		currentAddressBox.setModel(new DefaultComboBoxModel<String>(new String[] {"x3000"}));
 		GridBagConstraints gbc_currentAddressBox = new GridBagConstraints();
 		gbc_currentAddressBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_currentAddressBox.insets = new Insets(0, 0, 5, 5);
@@ -230,7 +231,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 		JButton btnSetValue = new JButton("set value");
 		btnSetValue.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				setValue();
+				setCurrentValue();
 			}
 		});
 		GridBagConstraints gbc_btnSetValue = new GridBagConstraints();
@@ -242,9 +243,9 @@ public class MainWindow extends JFrame implements ICPUListener {
 		return panel;
 	}
 
-	protected void setValue() {
+	protected void setCurrentValue() {
 		try {
-			Integer value = stringToInt(currentValueField.getText());
+			Integer value = NumberUtils.stringToInt(currentValueField.getText());
 			int row = codeTable.getSelectedRow();
 			if (row >= 0) {
 				cpu.writeMemory(row, value.shortValue());
@@ -256,12 +257,12 @@ public class MainWindow extends JFrame implements ICPUListener {
 
 	protected void goToAddress(String addressString) {
 		try {
-			Integer address = stringToInt(addressString);
+			Integer address = NumberUtils.stringToInt(addressString);
 			
 			address = address & 0xffff;
 			
 			addressString = String.format("%04x", address);
-			currentAddressBox.addItem(addressString);
+			addressModel.addAddress(address);
 			
 			codeTable.getSelectionModel().setSelectionInterval(address, address);
 			scrollTo(address);
@@ -271,21 +272,6 @@ public class MainWindow extends JFrame implements ICPUListener {
 			currentAddressBox.getEditor().selectAll();
 		}
 		
-	}
-
-	private Integer stringToInt(String addressString) {
-		addressString = addressString.replaceAll("\\s", "").toLowerCase();
-		if (addressString.startsWith("x"))
-			addressString = "0" + addressString;
-		
-		Integer address;
-		if (addressString.startsWith("b")) {
-			address = Integer.parseInt(addressString.substring(1), 2);
-		} else {
-			address = Integer.decode(addressString);
-		}
-		
-		return address;
 	}
 
 	private JPanel createRegisterPanel() {
@@ -363,13 +349,15 @@ public class MainWindow extends JFrame implements ICPUListener {
 		table.setRowSelectionAllowed(false);
 		table.setFillsViewportHeight(true);
 		table.setModel(model);
-	
+
 		TableCellRenderer cellLabelRenderer = new LabelTableCellRenderer();
 		table.getColumnModel().getColumn(0).setCellRenderer(cellLabelRenderer);
 		table.getColumnModel().getColumn(2).setCellRenderer(cellLabelRenderer);
 		table.getColumnModel().getColumn(4).setCellRenderer(cellLabelRenderer);
 		table.setDefaultRenderer(Integer.class, new Hex16TableCellRenderer(null));
 
+		table.setDefaultEditor(Integer.class, new NumberCellEditor());
+		
 		return table;
 	}
 

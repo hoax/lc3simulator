@@ -10,7 +10,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import javax.swing.text.Document;
 
 import de.nasskappe.lc3.sim.gui.formatter.BinaryFormatter;
 import de.nasskappe.lc3.sim.gui.formatter.DecimalFormatter;
@@ -28,26 +27,6 @@ public class JNumberField extends JTextField {
 		init();
 	}
 
-	public JNumberField(Document doc, String text, int columns) {
-		super(doc, text, columns);
-		init();
-	}
-
-	public JNumberField(int columns) {
-		super(columns);
-		init();
-	}
-
-	public JNumberField(String text, int columns) {
-		super(text, columns);
-		init();
-	}
-
-	public JNumberField(String text) {
-		super(text);
-		init();
-	}
-	
 	private void init() {
 		createPopup();
 	}
@@ -115,6 +94,10 @@ public class JNumberField extends JTextField {
 	private void updateText() {
 		String s = formatter.format(value);
 		setText(s);
+	}
+	
+	public int getNumber() {
+		return NumberUtils.stringToInt(getText());
 	}
 	
 }
