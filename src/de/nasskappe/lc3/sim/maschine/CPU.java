@@ -11,10 +11,6 @@ import java.util.Set;
 import de.nasskappe.lc3.sim.maschine.Register.CC_Value;
 import de.nasskappe.lc3.sim.maschine.cmds.CommandFactory;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
-import de.nasskappe.lc3.sim.maschine.cmds.JSR;
-import de.nasskappe.lc3.sim.maschine.cmds.RET;
-import de.nasskappe.lc3.sim.maschine.cmds.RTI;
-import de.nasskappe.lc3.sim.maschine.cmds.TRAP;
 
 public class CPU {
 	private final static int BIT_P = 0;
@@ -74,37 +70,6 @@ public class CPU {
 		fireInstructionExecuted(this, cmd);
 		
 		return cmd;
-	}
-	
-	public ICommand stepOver() {
-		int oldPC = getPC();
-		
-		ICommand lastCmd = step();
-		if (lastCmd.getClass() == JSR.class
-				|| lastCmd.getClass() == TRAP.class) {
-			while((oldPC + 1) != getPC() && !isBreakpointSetFor(getPC())) {
-				lastCmd = step();
-			}
-		}
-		
-		return lastCmd;
-	}
-
-	public ICommand stepReturn() {
-		ICommand lastCmd = null;
-		while((!isBreakpointSetFor(getPC()) || lastCmd == null) 
-				&& (lastCmd == null || !(lastCmd.getClass() == RET.class || lastCmd.getClass() == RTI.class))) {
-			lastCmd = step();
-		}
-		return lastCmd;
-	}
-	
-	public ICommand run() {
-		ICommand lastCmd = null;
-		while(!isBreakpointSetFor(getPC()) || lastCmd == null) {
-			lastCmd = step();
-		}
-		return lastCmd;
 	}
 	
 	public boolean isBreakpointSetFor(int pc) {

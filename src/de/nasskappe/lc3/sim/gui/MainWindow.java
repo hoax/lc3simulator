@@ -68,6 +68,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 	private JButton btnGo;
 	private JComboBox<String> currentAddressBox;
 	private HexNumberComboBoxModel addressModel;
+	private CpuUtils cpuUtils;
 	
 	/**
 	 * Launch the application.
@@ -93,15 +94,16 @@ public class MainWindow extends JFrame implements ICPUListener {
 		
 		cpu = new CPU();
 		cpu.addCpuListener(this);
+		cpuUtils = new CpuUtils(cpu);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 484);
 		
 		loadFileAction = new LoadFileAction(this, cpu);
-		runAction = new DebuggerRunAction(cpu);
-		stepIntoAction = new DebuggerStepIntoAction(cpu);
-		stepOverAction = new DebuggerStepOverAction(cpu);
-		stepReturnAction = new DebuggerStepReturnAction(cpu);
+		runAction = new DebuggerRunAction(cpuUtils);
+		stepIntoAction = new DebuggerStepIntoAction(cpuUtils);
+		stepOverAction = new DebuggerStepOverAction(cpuUtils);
+		stepReturnAction = new DebuggerStepReturnAction(cpuUtils);
 		
 		JMenuBar menuBar = createMenuBar();
 		setJMenuBar(menuBar);

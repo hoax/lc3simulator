@@ -6,16 +6,16 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import de.nasskappe.lc3.sim.gui.CpuUtils;
 import de.nasskappe.lc3.sim.gui.MainWindow;
-import de.nasskappe.lc3.sim.maschine.CPU;
 
 public class DebuggerStepReturnAction extends AbstractAction {
 
-	private CPU cpu;
 	private Icon icon;
+	private CpuUtils utils;
 
-	public DebuggerStepReturnAction(CPU cpu) {
-		this.cpu = cpu;
+	public DebuggerStepReturnAction(CpuUtils utils) {
+		this.utils = utils;
 
 		icon = new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/stepreturn.gif"));
 
@@ -28,7 +28,7 @@ public class DebuggerStepReturnAction extends AbstractAction {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		cpu.stepReturn();
+		utils.stepReturn();
 	}
 
 }

@@ -6,16 +6,16 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import de.nasskappe.lc3.sim.gui.CpuUtils;
 import de.nasskappe.lc3.sim.gui.MainWindow;
-import de.nasskappe.lc3.sim.maschine.CPU;
 
 public class DebuggerStepOverAction extends AbstractAction {
 
-	private CPU cpu;
 	private Icon icon;
+	private CpuUtils utils;
 
-	public DebuggerStepOverAction(CPU cpu) {
-		this.cpu = cpu;
+	public DebuggerStepOverAction(CpuUtils utils) {
+		this.utils = utils;
 
 		icon = new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/stepover.gif"));
 
@@ -28,7 +28,7 @@ public class DebuggerStepOverAction extends AbstractAction {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		cpu.stepOver();
+		utils.stepOver();
 	}
 
 }
