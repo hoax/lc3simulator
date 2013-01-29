@@ -11,8 +11,16 @@ import java.util.Set;
 import de.nasskappe.lc3.sim.maschine.Register.CC_Value;
 import de.nasskappe.lc3.sim.maschine.cmds.CommandFactory;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
+import de.nasskappe.lc3.sim.maschine.cmds.JSR;
+import de.nasskappe.lc3.sim.maschine.cmds.RET;
+import de.nasskappe.lc3.sim.maschine.cmds.RTI;
+import de.nasskappe.lc3.sim.maschine.cmds.TRAP;
 
 public class CPU {
+	public enum State {
+		RUNNING, STOPPED
+	}
+	
 	private final static int BIT_P = 0;
 	private final static int BIT_Z = 1;
 	private final static int BIT_N = 2;
@@ -22,6 +30,7 @@ public class CPU {
 	private Memory mem;
 	private Map<Register, Short> register;
 	private int currentPriority;
+	private State state;
 	
 	private CommandFactory cmdFactory;
 	private Set<ICPUListener> listeners;
@@ -29,6 +38,7 @@ public class CPU {
 	
 	
 	public CPU() {
+		state = State.STOPPED;
 		currentPriority = 0;
 		listeners = new HashSet<ICPUListener>();
 		cmdFactory = new CommandFactory();
@@ -71,6 +81,61 @@ public class CPU {
 		
 		return cmd;
 	}
+	
+	public ICommand stepOver() {
+		setState(State.RUNNING);
+		
+		int oldPC = getPC();
+		
+		ICommand lastCmd = step();
+		if (lastCmd.getClass() == JSR.class
+				|| lastCmd.getClass() == TRAP.class) {
+			while(!isStopped() && (oldPC + 1) != getPC() && !isBreakpointSetFor(getPC())) {
+				lastCmd = step();
+			}
+		}
+
+		setState(State.STOPPED);
+		return lastCmd;
+	}
+
+	public ICommand stepReturn() {
+		setState(State.RUNNING);
+		
+		ICommand lastCmd = null;
+		while(!isStopped() && (!isBreakpointSetFor(getPC()) || lastCmd == null) 
+				&& (lastCmd == null || !(lastCmd.getClass() == RET.class || lastCmd.getClass() == RTI.class))) {
+			lastCmd = step();
+		}
+		
+		setState(State.STOPPED);
+		return lastCmd;
+	}
+	
+	public ICommand run() {
+		setState(State.RUNNING);
+		
+		ICommand lastCmd = null;
+		while(!isStopped() && (!isBreakpointSetFor(getPC()) || lastCmd == null)) {
+			lastCmd = step();
+		}
+		
+		setState(State.STOPPED);
+		return lastCmd;
+	}
+
+	public void setState(State newState) {
+		if (newState != state) {
+			State oldState = state;
+			state = newState;
+			fireStateChanged(oldState, newState);
+		}
+	}
+	
+	public boolean isStopped() {
+		return state == State.STOPPED;
+	}
+	
 	
 	public boolean isBreakpointSetFor(int pc) {
 		return addressBreakpoints.contains(pc);
@@ -144,9 +209,16 @@ public class CPU {
 			l.memoryChanged(this, addr, value);
 		}
 	}
+	
+	private void fireStateChanged(State oldState, State newState) {
+		for (ICPUListener l : listeners) {
+			l.stateChanged(this, oldState, newState);
+		}
+	}
 
 	public void addCpuListener(ICPUListener listener) {
 		listeners.add(listener);
+		listener.stateChanged(this, state, state);
 	}
 	
 	public boolean removeCpuListener(ICPUListener listener) {

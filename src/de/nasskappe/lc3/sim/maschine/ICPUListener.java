@@ -9,4 +9,6 @@ public interface ICPUListener {
 	void instructionExecuted(CPU cpu, ICommand cmd);
 
 	void memoryChanged(CPU cpu, int addr, short value);
+	
+	void stateChanged(CPU cpu, CPU.State oldState, CPU.State newState);
 }
