@@ -30,7 +30,7 @@ public class CPU {
 	private Memory mem;
 	private Map<Register, Short> register;
 	private int currentPriority;
-	private State state;
+	private volatile State state;
 	
 	private CommandFactory cmdFactory;
 	private Set<ICPUListener> listeners;
@@ -45,19 +45,8 @@ public class CPU {
 		mem = new Memory();
 		register = new HashMap<Register, Short>();
 		addressBreakpoints = new HashSet<>();
-
-		register.put(Register.R0, (short) 0);
-		register.put(Register.R1, (short) 0);
-		register.put(Register.R2, (short) 0);
-		register.put(Register.R3, (short) 0);
-		register.put(Register.R4, (short) 0);
-		register.put(Register.R5, (short) 0);
-		register.put(Register.R6, (short) 0);
-		register.put(Register.R7, (short) 0);
-		register.put(Register.PC, (short) 0x3000);
-		register.put(Register.PSR, (short) 0);
-		register.put(Register.IR, (short) 0);
-		updateCC((short) 0);
+	
+		reset();
 	}
 	
 	public void loadData(int startAddress, InputStream input) throws IOException {
@@ -266,6 +255,45 @@ public class CPU {
 	
 	private int bool2bit(boolean v) {
 		return (v) ? 1 : 0;
+	}
+
+	public void reset() {
+		setState(State.STOPPED);
+		
+		for(int i = 0; i< 0x10000; i++) {
+			writeMemory(i, (short) 0);
+		}
+		
+		InputStream osStream = getClass().getResourceAsStream("lc3os.obj");
+		assert(osStream != null);
+		
+		try {
+			int addr = osStream.read() << 8;
+			addr |= osStream.read();
+			
+			loadData(addr, osStream);
+		} catch (IOException e) {
+			throw new RuntimeException(e.getMessage(), e);
+		} finally {
+			try {
+				osStream.close();
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}
+		}
+		
+		register.put(Register.R0, (short) 0);
+		register.put(Register.R1, (short) 0);
+		register.put(Register.R2, (short) 0);
+		register.put(Register.R3, (short) 0);
+		register.put(Register.R4, (short) 0);
+		register.put(Register.R5, (short) 0);
+		register.put(Register.R6, (short) 0);
+		register.put(Register.R7, (short) 0);
+		register.put(Register.PSR, (short) 0);
+		register.put(Register.IR, (short) 0);
+		register.put(Register.PC, (short) 0x3000);
+		updateCC((short) 0);
 	}
 
 }

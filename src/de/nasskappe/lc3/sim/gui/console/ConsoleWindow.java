@@ -19,19 +19,15 @@ import de.nasskappe.lc3.sim.maschine.CPU;
 import de.nasskappe.lc3.sim.maschine.CPU.State;
 import de.nasskappe.lc3.sim.maschine.ICPUListener;
 import de.nasskappe.lc3.sim.maschine.IDisplay;
+import de.nasskappe.lc3.sim.maschine.Memory;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
 public class ConsoleWindow extends JDialog implements IDisplay, ICPUListener {
 
-	public static int ADDR_KBSR = 0xFE00;
-	public static int ADDR_KBDR = 0xFE02;
-	public static int ADDR_DSR = 0xFE04;
-	public static int ADDR_DDR = 0xFE06;
-	
-	
 	private JTextArea textArea;
 	private CPU cpu;
+	private volatile boolean displayBusy;
 
 	public ConsoleWindow(CPU cpu, Window parent) {
 		super(parent);
@@ -65,9 +61,9 @@ public class ConsoleWindow extends JDialog implements IDisplay, ICPUListener {
 
 	protected void handleKeypress(KeyEvent e) {
 		if (cpu != null) {
-			int kbsr = cpu.readMemory(ADDR_KBSR);
+			int kbsr = cpu.readMemory(Memory.ADDR_KBSR);
 			if ((kbsr & (1 << 15)) == 0) {
-				cpu.writeMemory(ADDR_KBDR, (short) (e.getKeyChar() & 0xFF));
+				cpu.writeMemory(Memory.ADDR_KBDR, (short) (e.getKeyChar() & 0xFF));
 				setKeyboardReady();
 			}
 		}
@@ -94,6 +90,9 @@ public class ConsoleWindow extends JDialog implements IDisplay, ICPUListener {
 		try {
 			textArea.getDocument().insertString(textArea.getDocument().getLength(),  ""+c, null);
 			textArea.setCaretPosition(textArea.getDocument().getLength());
+			if (!isVisible()) {
+				setVisible(true);
+			}
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
@@ -110,8 +109,8 @@ public class ConsoleWindow extends JDialog implements IDisplay, ICPUListener {
 	@Override
 	public void memoryChanged(final CPU cpu, int addr, final short value) {
 		// output character to display
-		if (addr == ADDR_DDR) {
-			if (isDisplayReady(cpu)) {
+		if (addr == Memory.ADDR_DDR) {
+			if (isDisplayReady() && value != 0) {
 				setDisplayBusy(cpu);
 				EventQueue.invokeLater(new Runnable() {
 					@Override
@@ -123,6 +122,15 @@ public class ConsoleWindow extends JDialog implements IDisplay, ICPUListener {
 					}
 				});
 			}
+		} else if (addr == Memory.ADDR_DSR) {
+			boolean mBusy = (value & 0x8000) == 0;
+			if (mBusy != displayBusy) {
+				if (displayBusy) {
+					setDisplayBusy(cpu);
+				} else {
+					setDisplayReady(cpu);
+				}
+			}
 		}
 	}
 
@@ -130,34 +138,35 @@ public class ConsoleWindow extends JDialog implements IDisplay, ICPUListener {
 	public void stateChanged(CPU cpu, State oldState, State newState) {
 	}
 
-	private boolean isDisplayReady(CPU cpu) {
-		int dsr = cpu.readMemory(ADDR_DSR);
-		return ((dsr & (1 << 15)) != 0);
+	private boolean isDisplayReady() {
+		return !displayBusy;
 	}
 	
 	private void setDisplayReady(CPU cpu) {
 		// display ready
-		cpu.writeMemory(ADDR_DSR, (short) 0x8000);
+		displayBusy = false;
+		cpu.writeMemory(Memory.ADDR_DSR, (short) 0x8000);
 	}
 	
 	private void setDisplayBusy(CPU cpu) {
 		// display busy
-		cpu.writeMemory(ADDR_DSR, (short) 0); 
+		displayBusy = true;
+		cpu.writeMemory(Memory.ADDR_DSR, (short) 0);
 	}
 
 	@Override
 	public void memoryRead(CPU cpu, int addr, short value) {
-		if (addr == ADDR_KBDR) {
+		if (addr == Memory.ADDR_KBDR) {
 			setKeyboardBusy();
 		}
 	}
 
 	private void setKeyboardBusy() {
-		cpu.writeMemory(ADDR_KBSR, (short) 0x0000);
+		cpu.writeMemory(Memory.ADDR_KBSR, (short) 0x0000);
 	}
 
 	private void setKeyboardReady() {
-		cpu.writeMemory(ADDR_KBSR, (short) 0x8000);
+		cpu.writeMemory(Memory.ADDR_KBSR, (short) 0x8000);
 	}
 
 	

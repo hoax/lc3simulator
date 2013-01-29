@@ -44,6 +44,7 @@ import de.nasskappe.lc3.sim.gui.action.DebuggerStepOverAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepReturnAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStopAction;
 import de.nasskappe.lc3.sim.gui.action.LoadFileAction;
+import de.nasskappe.lc3.sim.gui.action.ResetAction;
 import de.nasskappe.lc3.sim.gui.action.ShowConsoleAction;
 import de.nasskappe.lc3.sim.gui.console.ConsoleWindow;
 import de.nasskappe.lc3.sim.gui.editor.NumberCellEditor;
@@ -71,6 +72,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 	private DebuggerStepOverAction stepOverAction;
 	private DebuggerStepReturnAction stepReturnAction;
 	private ShowConsoleAction showConsoleAction;
+	private ResetAction resetAction;
 	
 	private JNumberField currentValueField;
 	private JButton btnGo;
@@ -136,6 +138,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 		
 		showConsoleAction = new ShowConsoleAction(console);
 		loadFileAction = new LoadFileAction(this, cpu);
+		resetAction = new ResetAction(cpu);
 		runAction = new DebuggerRunAction(cpuUtils, scrollToPcRunnable);
 		stopAction = new DebuggerStopAction(cpuUtils);
 		stepIntoAction = new DebuggerStepIntoAction(cpuUtils, scrollToPcRunnable);
@@ -158,6 +161,8 @@ public class MainWindow extends JFrame implements ICPUListener {
 
 		codeTable.getSelectionModel().setSelectionInterval(0x3000, 0x3000);
 		codeTable.requestFocus();
+		
+		cpu.reset();
 	}
 	
 	private ConsoleWindow createConsole() {
@@ -363,6 +368,10 @@ public class MainWindow extends JFrame implements ICPUListener {
 		JMenuItem loadFile = new JMenuItem(loadFileAction);
 		loadFile.setAccelerator(KeyStroke.getKeyStroke("control O"));
 		file.add(loadFile);
+		
+		JMenuItem reset = new JMenuItem(resetAction);
+		reset.setAccelerator(KeyStroke.getKeyStroke("control R"));
+		file.add(reset);
 		
 		JSeparator separator = new JSeparator();
 		file.add(separator);

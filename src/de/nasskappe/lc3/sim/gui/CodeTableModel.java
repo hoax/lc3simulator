@@ -103,8 +103,12 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 
 	@Override
 	public void memoryChanged(CPU cpu, int addr, short value) {
-		ICommand cmd = factory.createCommand(value, addr);
-		row2cmd.put(addr, cmd);
+		if (value == 0) {
+			row2cmd.remove((Integer) addr);
+		} else {
+			ICommand cmd = factory.createCommand(value, addr);
+			row2cmd.put(addr, cmd);
+		}
 		fireTableRowsUpdated(addr, addr);
 	}
 
