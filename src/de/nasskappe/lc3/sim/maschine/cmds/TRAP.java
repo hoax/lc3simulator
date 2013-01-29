@@ -1,6 +1,7 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
 import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.Register;
 
 public class TRAP extends AbstractCommand {
 
@@ -19,7 +20,11 @@ public class TRAP extends AbstractCommand {
 	
 	@Override
 	public void execute(CPU cpu) {
-		// TODO
+		int currentPC = cpu.getPC();
+		cpu.setRegister(Register.R7, (short) currentPC);
+		
+		int addr = cpu.readMemory(trap) & 0xFFFF;
+		cpu.setPC(addr);
 	}
 
 	public int getTrap() {
