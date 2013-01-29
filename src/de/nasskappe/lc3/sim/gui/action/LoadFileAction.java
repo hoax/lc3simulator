@@ -13,24 +13,24 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 
 import de.nasskappe.lc3.sim.gui.MainWindow;
-import de.nasskappe.lc3.sim.maschine.CPU;
-import de.nasskappe.lc3.sim.maschine.CPU.State;
-import de.nasskappe.lc3.sim.maschine.ICPUListener;
+import de.nasskappe.lc3.sim.maschine.LC3;
+import de.nasskappe.lc3.sim.maschine.LC3.State;
+import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
-public class LoadFileAction extends AbstractAction implements ICPUListener {
+public class LoadFileAction extends AbstractAction implements ILC3Listener {
 
 	JFileChooser fc;
 	Window window;
-	private CPU cpu;
+	private LC3 lc3;
 	private Icon icon;
 	
-	public LoadFileAction(Window parentWindow, CPU cpu) {
+	public LoadFileAction(Window parentWindow, LC3 lc3) {
 		fc = new JFileChooser(new File("."));
 		
 		window = parentWindow;
-		this.cpu = cpu;
+		this.lc3 = lc3;
 		
 		icon = new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/open.gif"));
 		
@@ -60,24 +60,24 @@ public class LoadFileAction extends AbstractAction implements ICPUListener {
 		FileInputStream input = new FileInputStream(selectedFile);
 		int addr = input.read() << 8 | input.read();
 		
-		cpu.loadData(addr, input);
-		cpu.setPC(addr);
+		lc3.loadData(addr, input);
+		lc3.setPC(addr);
 	}
 
 	@Override
-	public void registerChanged(CPU cpu, Register r, short oldValue, short value) {
+	public void registerChanged(LC3 lc3, Register r, short oldValue, short value) {
 	}
 
 	@Override
-	public void instructionExecuted(CPU cpu, ICommand cmd) {
+	public void instructionExecuted(LC3 lc3, ICommand cmd) {
 	}
 
 	@Override
-	public void memoryChanged(CPU cpu, int addr, short value) {
+	public void memoryChanged(LC3 lc3, int addr, short value) {
 	}
 
 	@Override
-	public void stateChanged(CPU cpu, State oldState, final State newState) {
+	public void stateChanged(LC3 lc3, State oldState, final State newState) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -87,7 +87,7 @@ public class LoadFileAction extends AbstractAction implements ICPUListener {
 	}
 
 	@Override
-	public void memoryRead(CPU cpu, int addr, short value) {
+	public void memoryRead(LC3 lc3, int addr, short value) {
 	}
 
 }

@@ -1,6 +1,6 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.Register;
 
 public class LDR extends AbstractCommand {
@@ -26,11 +26,11 @@ public class LDR extends AbstractCommand {
 	}
 
 	@Override
-	public void execute(CPU cpu) {
-		int addr = cpu.getRegister(baseR) + offset;
-		short value = cpu.readMemory(addr);
-		cpu.setRegister(dr, value);
-		cpu.updateCC(value);
+	public void execute(LC3 lc3) {
+		int addr = lc3.getRegister(baseR) + offset;
+		short value = lc3.readMemory(addr);
+		lc3.setRegister(dr, value);
+		lc3.updateCC(value);
 	}
 
 	public Register getDr() {

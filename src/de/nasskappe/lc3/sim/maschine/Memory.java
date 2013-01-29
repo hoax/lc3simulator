@@ -7,6 +7,7 @@ public class Memory {
 	public static int ADDR_DSR = 0xFE04;
 	public static int ADDR_KBDR = 0xFE02;
 	public static int ADDR_KBSR = 0xFE00;
+	public static int ADDR_MCR = 0xFFFE;
 	
 	public Memory() {
 		mem = new short[0x10000];

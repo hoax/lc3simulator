@@ -1,6 +1,6 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.Register;
 
 public class LDI extends AbstractCommand {
@@ -21,12 +21,12 @@ public class LDI extends AbstractCommand {
 	}
 	
 	@Override
-	public void execute(CPU cpu) {
-		int addr = cpu.getPC() + pcOffset;
-		int addr2 = ((int)cpu.readMemory(addr)) & 0xFFFF;
-		short value = cpu.readMemory(addr2);
-		cpu.setRegister(dr, value);
-		cpu.updateCC(value);
+	public void execute(LC3 lc3) {
+		int addr = lc3.getPC() + pcOffset;
+		int addr2 = ((int)lc3.readMemory(addr)) & 0xFFFF;
+		short value = lc3.readMemory(addr2);
+		lc3.setRegister(dr, value);
+		lc3.updateCC(value);
 	}
 
 	public Register getDr() {

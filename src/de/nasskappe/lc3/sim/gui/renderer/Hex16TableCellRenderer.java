@@ -5,14 +5,14 @@ import java.awt.Component;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 
 public class Hex16TableCellRenderer extends DefaultCodeTableCellRenderer {
 
 	private static final long serialVersionUID = -4664007369311751307L;
 
-	public Hex16TableCellRenderer(CPU cpu) {
-		super(cpu);
+	public Hex16TableCellRenderer(LC3 lc3) {
+		super(lc3);
 	}
 	
 	public Component getTableCellRendererComponent(JTable table, Object value,

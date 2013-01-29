@@ -1,6 +1,6 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.Register.CC_Value;
 
@@ -25,14 +25,14 @@ public class BR extends AbstractCommand {
 	}
 
 	@Override
-	public void execute(CPU cpu) {
-		CC_Value cc = cpu.getCC();
+	public void execute(LC3 lc3) {
+		CC_Value cc = lc3.getCC();
 		if ((p && (cc == Register.CC_Value.P))
 				|| (n && (cc == Register.CC_Value.N))
 				|| (z && (cc == Register.CC_Value.Z))) {
-			int pc = cpu.getPC();
+			int pc = lc3.getPC();
 			pc += pcOffset;
-			cpu.setPC(pc);
+			lc3.setPC(pc);
 		}
 	}
 

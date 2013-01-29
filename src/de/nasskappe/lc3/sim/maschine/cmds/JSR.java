@@ -1,6 +1,6 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.Register;
 
 
@@ -35,18 +35,18 @@ public class JSR extends AbstractCommand {
 	}
 
 	@Override
-	public void execute(CPU cpu) {
-		int oldPC = cpu.getPC();
-		cpu.setRegister(Register.R7, (short) oldPC);
+	public void execute(LC3 lc3) {
+		int oldPC = lc3.getPC();
+		lc3.setRegister(Register.R7, (short) oldPC);
 		
 		int pc;
 		if (baseR != null) {
-			pc = cpu.getRegister(baseR); 
+			pc = lc3.getRegister(baseR); 
 		} else {
 			pc = oldPC + pcOffset;
 		}
 
-		cpu.setPC(pc);
+		lc3.setPC(pc);
 	}
 
 	public short getPCOffset() {

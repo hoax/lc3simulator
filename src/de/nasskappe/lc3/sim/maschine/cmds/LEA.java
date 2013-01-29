@@ -1,6 +1,6 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.Register;
 
 public class LEA extends AbstractCommand {
@@ -21,10 +21,10 @@ public class LEA extends AbstractCommand {
 	}
 	
 	@Override
-	public void execute(CPU cpu) {
-		int addr = cpu.getPC() + pcOffset;
-		cpu.setRegister(dr, (short) addr);
-		cpu.updateCC((short)addr);
+	public void execute(LC3 lc3) {
+		int addr = lc3.getPC() + pcOffset;
+		lc3.setRegister(dr, (short) addr);
+		lc3.updateCC((short)addr);
 	}
 	
 	public Register getDr() {

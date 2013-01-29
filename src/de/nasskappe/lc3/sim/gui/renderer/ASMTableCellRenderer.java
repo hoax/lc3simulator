@@ -5,7 +5,7 @@ import java.awt.Component;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.cmds.ADD;
 import de.nasskappe.lc3.sim.maschine.cmds.AND;
 import de.nasskappe.lc3.sim.maschine.cmds.BR;
@@ -275,8 +275,8 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 	
 	private ToStringVisitor visitor = new ToStringVisitor();
 	
-	public ASMTableCellRenderer(CPU cpu) {
-		super(cpu);
+	public ASMTableCellRenderer(LC3 lc3) {
+		super(lc3);
 	}
 
 	@Override

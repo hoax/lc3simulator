@@ -1,6 +1,6 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.Register;
 
 public class ADD extends AbstractCommand {
@@ -38,15 +38,15 @@ public class ADD extends AbstractCommand {
 	}
 
 	@Override
-	public void execute(CPU cpu) {
-		int val1 = cpu.getRegister(sr1);
+	public void execute(LC3 lc3) {
+		int val1 = lc3.getRegister(sr1);
 		int val2 = imm;
 		if (sr2 != null) {
-			val2 = cpu.getRegister(sr2);
+			val2 = lc3.getRegister(sr2);
 		}
 		short result = (short) (val1 + val2);
-		cpu.setRegister(dr, result);
-		cpu.updateCC(result);
+		lc3.setRegister(dr, result);
+		lc3.updateCC(result);
 	}
 
 	public Register getDr() {

@@ -8,20 +8,16 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 
 public class DefaultCodeTableCellRenderer extends DefaultTableCellRenderer {
 
 	public static Color PC_COLOR = Color.CYAN;
 	
-	private CPU cpu;
+	LC3 lc3;
 	
-	public DefaultCodeTableCellRenderer(CPU cpu) {
-		this.cpu = cpu;
-	}
-	
-	public CPU getCpu() {
-		return cpu;
+	public DefaultCodeTableCellRenderer(LC3 lc3) {
+		this.lc3 = lc3;
 	}
 	
 	@Override
@@ -33,7 +29,7 @@ public class DefaultCodeTableCellRenderer extends DefaultTableCellRenderer {
 		JLabel comp = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
 				row, column);
 		
-		if (cpu != null && row == cpu.getPC()) {
+		if (lc3 != null && row == lc3.getPC()) {
 			comp.setBackground(PC_COLOR);
 		}
 		

@@ -7,21 +7,21 @@ import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-import de.nasskappe.lc3.sim.gui.CpuUtils;
+import de.nasskappe.lc3.sim.gui.Lc3Utils;
 import de.nasskappe.lc3.sim.gui.MainWindow;
-import de.nasskappe.lc3.sim.maschine.CPU;
-import de.nasskappe.lc3.sim.maschine.CPU.State;
-import de.nasskappe.lc3.sim.maschine.ICPUListener;
+import de.nasskappe.lc3.sim.maschine.LC3;
+import de.nasskappe.lc3.sim.maschine.LC3.State;
+import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
-public class DebuggerStepReturnAction extends AbstractAction implements ICPUListener {
+public class DebuggerStepReturnAction extends AbstractAction implements ILC3Listener {
 
 	private Icon icon;
-	private CpuUtils utils;
+	private Lc3Utils utils;
 	private Runnable postExecute;
 
-	public DebuggerStepReturnAction(CpuUtils utils, Runnable postExecute) {
+	public DebuggerStepReturnAction(Lc3Utils utils, Runnable postExecute) {
 		this.utils = utils;
 		this.postExecute = postExecute;
 
@@ -40,19 +40,19 @@ public class DebuggerStepReturnAction extends AbstractAction implements ICPUList
 	}
 
 	@Override
-	public void registerChanged(CPU cpu, Register r, short oldValue, short value) {
+	public void registerChanged(LC3 lc3, Register r, short oldValue, short value) {
 	}
 
 	@Override
-	public void instructionExecuted(CPU cpu, ICommand cmd) {
+	public void instructionExecuted(LC3 lc3, ICommand cmd) {
 	}
 
 	@Override
-	public void memoryChanged(CPU cpu, int addr, short value) {
+	public void memoryChanged(LC3 lc3, int addr, short value) {
 	}
 
 	@Override
-	public void stateChanged(CPU cpu, State oldState, final State newState) {
+	public void stateChanged(LC3 lc3, State oldState, final State newState) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -62,7 +62,7 @@ public class DebuggerStepReturnAction extends AbstractAction implements ICPUList
 	}
 
 	@Override
-	public void memoryRead(CPU cpu, int addr, short value) {
+	public void memoryRead(LC3 lc3, int addr, short value) {
 	}
 
 }

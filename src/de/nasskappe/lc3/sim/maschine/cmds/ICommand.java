@@ -1,10 +1,10 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 
 public interface ICommand {
 
-	void execute(CPU cpu);
+	void execute(LC3 lc3);
 
 	void init(short code);
 

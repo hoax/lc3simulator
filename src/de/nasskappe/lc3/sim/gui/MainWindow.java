@@ -53,17 +53,17 @@ import de.nasskappe.lc3.sim.gui.renderer.Binary16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.BreakpointTableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.Hex16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.LabelTableCellRenderer;
-import de.nasskappe.lc3.sim.maschine.CPU;
-import de.nasskappe.lc3.sim.maschine.CPU.State;
-import de.nasskappe.lc3.sim.maschine.ICPUListener;
+import de.nasskappe.lc3.sim.maschine.LC3;
+import de.nasskappe.lc3.sim.maschine.LC3.State;
+import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
-public class MainWindow extends JFrame implements ICPUListener {
+public class MainWindow extends JFrame implements ILC3Listener {
 
 	private JPanel contentPane;
 	private JTable registerTable;
-	private CPU cpu;
+	private LC3 lc3;
 	private JTable codeTable;
 	private LoadFileAction loadFileAction;
 	private DebuggerRunAction runAction;
@@ -78,7 +78,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 	private JButton btnGo;
 	private JComboBox<String> currentAddressBox;
 	private HexNumberComboBoxModel addressModel;
-	private CpuUtils cpuUtils;
+	private Lc3Utils lc3Utils;
 	private ConsoleWindow console;
 	
 	private Runnable scrollToPcRunnable = new Runnable() {
@@ -120,9 +120,9 @@ public class MainWindow extends JFrame implements ICPUListener {
 	public MainWindow() {
 		setTitle("Lc3 Simulator");
 		
-		cpu = new CPU();
-		cpu.addCpuListener(this);
-		cpuUtils = new CpuUtils(cpu);
+		lc3 = new LC3();
+		lc3.addListener(this);
+		lc3Utils = new Lc3Utils(lc3);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 484);
@@ -137,20 +137,20 @@ public class MainWindow extends JFrame implements ICPUListener {
 		console = createConsole();
 		
 		showConsoleAction = new ShowConsoleAction(console);
-		loadFileAction = new LoadFileAction(this, cpu);
-		resetAction = new ResetAction(cpu);
-		runAction = new DebuggerRunAction(cpuUtils, scrollToPcRunnable);
-		stopAction = new DebuggerStopAction(cpuUtils);
-		stepIntoAction = new DebuggerStepIntoAction(cpuUtils, scrollToPcRunnable);
-		stepOverAction = new DebuggerStepOverAction(cpuUtils, scrollToPcRunnable);
-		stepReturnAction = new DebuggerStepReturnAction(cpuUtils, scrollToPcRunnable);
+		loadFileAction = new LoadFileAction(this, lc3);
+		resetAction = new ResetAction(lc3);
+		runAction = new DebuggerRunAction(lc3Utils, scrollToPcRunnable);
+		stopAction = new DebuggerStopAction(lc3Utils);
+		stepIntoAction = new DebuggerStepIntoAction(lc3Utils, scrollToPcRunnable);
+		stepOverAction = new DebuggerStepOverAction(lc3Utils, scrollToPcRunnable);
+		stepReturnAction = new DebuggerStepReturnAction(lc3Utils, scrollToPcRunnable);
 		
-		cpu.addCpuListener(loadFileAction);
-		cpu.addCpuListener(runAction);
-		cpu.addCpuListener(stopAction);
-		cpu.addCpuListener(stepIntoAction);
-		cpu.addCpuListener(stepOverAction);
-		cpu.addCpuListener(stepReturnAction);
+		lc3.addListener(loadFileAction);
+		lc3.addListener(runAction);
+		lc3.addListener(stopAction);
+		lc3.addListener(stepIntoAction);
+		lc3.addListener(stepOverAction);
+		lc3.addListener(stepReturnAction);
 		
 		JMenuBar menuBar = createMenuBar();
 		setJMenuBar(menuBar);
@@ -162,11 +162,11 @@ public class MainWindow extends JFrame implements ICPUListener {
 		codeTable.getSelectionModel().setSelectionInterval(0x3000, 0x3000);
 		codeTable.requestFocus();
 		
-		cpu.reset();
+		lc3.reset();
 	}
 	
 	private ConsoleWindow createConsole() {
-		ConsoleWindow console = new ConsoleWindow(cpu, this);
+		ConsoleWindow console = new ConsoleWindow(lc3, this);
 		console.setAlwaysOnTop(true);
 				
 		return console;
@@ -303,7 +303,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 			Integer value = NumberUtils.stringToInt(currentValueField.getText());
 			int row = codeTable.getSelectedRow();
 			if (row >= 0) {
-				cpu.writeMemory(row, value.shortValue());
+				lc3.writeMemory(row, value.shortValue());
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(this, e.getMessage());
@@ -415,8 +415,8 @@ public class MainWindow extends JFrame implements ICPUListener {
 
 	private JTable createRegisterTable() {
 		RegisterTableModel model = new RegisterTableModel();
-		cpu.addCpuListener(model);
-		model.registerChanged(cpu, Register.IR, (short) 0, (short) 0);
+		lc3.addListener(model);
+		model.registerChanged(lc3, Register.IR, (short) 0, (short) 0);
 
 		JTable table = new JTable();
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -440,15 +440,15 @@ public class MainWindow extends JFrame implements ICPUListener {
 		table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setRowSelectionAllowed(true);
 		table.setFillsViewportHeight(true);
-		CodeTableModel codeModel = new CodeTableModel(cpu);
-		cpu.addCpuListener(codeModel);
+		CodeTableModel codeModel = new CodeTableModel(lc3);
+		lc3.addListener(codeModel);
 		table.setModel(codeModel);
 		
-		table.getColumnModel().getColumn(0).setCellRenderer(new BreakpointTableCellRenderer(cpu, table));
-		table.getColumnModel().getColumn(1).setCellRenderer(new Hex16TableCellRenderer(cpu));
-		table.getColumnModel().getColumn(2).setCellRenderer(new Binary16TableCellRenderer(cpu));
-		table.getColumnModel().getColumn(3).setCellRenderer(new Hex16TableCellRenderer(cpu));
-		table.getColumnModel().getColumn(4).setCellRenderer(new ASMTableCellRenderer(cpu));
+		table.getColumnModel().getColumn(0).setCellRenderer(new BreakpointTableCellRenderer(lc3, table));
+		table.getColumnModel().getColumn(1).setCellRenderer(new Hex16TableCellRenderer(lc3));
+		table.getColumnModel().getColumn(2).setCellRenderer(new Binary16TableCellRenderer(lc3));
+		table.getColumnModel().getColumn(3).setCellRenderer(new Hex16TableCellRenderer(lc3));
+		table.getColumnModel().getColumn(4).setCellRenderer(new ASMTableCellRenderer(lc3));
 		
 		table.getColumnModel().getColumn(0).setResizable(false);
 		table.getColumnModel().getColumn(0).setMaxWidth(22);
@@ -474,7 +474,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 				}
 				else if (SwingUtilities.isRightMouseButton(e) && e.getClickCount() == 2) {
 					int row = table.rowAtPoint(e.getPoint());
-					cpu.setPC(row);
+					lc3.setPC(row);
 				}
 			}
 		});	
@@ -510,7 +510,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 	private void updateCurrentValueField() {
 		int row = codeTable.getSelectedRow();
 		if (row != -1) {
-			int value = ((int)cpu.readMemory(row)) & 0xffff;
+			int value = ((int)lc3.readMemory(row)) & 0xffff;
 			
 			currentValueField.setNumber(value);
 		}
@@ -552,11 +552,11 @@ public class MainWindow extends JFrame implements ICPUListener {
 
 	protected void toggleBreakpointAtSelectedAddress() {
 		int selectedRow = codeTable.getSelectedRow();
-		cpu.toggleAddressBreakpoint(selectedRow);
+		lc3.toggleAddressBreakpoint(selectedRow);
 	}
 
 	private void scrollToPC() {
-		int row = cpu.getPC();
+		int row = lc3.getPC();
 		scrollTo(row);
 	}
 	
@@ -568,15 +568,15 @@ public class MainWindow extends JFrame implements ICPUListener {
 	}
 
 	@Override
-	public void registerChanged(CPU cpu, Register r, short oldValue, short value) {
+	public void registerChanged(LC3 lc3, Register r, short oldValue, short value) {
 	}
 
 	@Override
-	public void instructionExecuted(CPU cpu, ICommand cmd) {
+	public void instructionExecuted(LC3 lc3, ICommand cmd) {
 	}
 
 	@Override
-	public void memoryChanged(final CPU cpu, final int addr, final short value) {
+	public void memoryChanged(final LC3 lc3, final int addr, final short value) {
 		if (addr == codeTable.getSelectedRow()) {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
@@ -588,11 +588,11 @@ public class MainWindow extends JFrame implements ICPUListener {
 	}
 
 	@Override
-	public void stateChanged(CPU cpu, State oldState, State newState) {
+	public void stateChanged(LC3 lc3, State oldState, State newState) {
 	}
 
 	@Override
-	public void memoryRead(CPU cpu, int addr, short value) {
+	public void memoryRead(LC3 lc3, int addr, short value) {
 	}
 
 }

@@ -1,6 +1,6 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.Register;
 
 public class STI extends AbstractCommand {
@@ -21,11 +21,11 @@ public class STI extends AbstractCommand {
 	}
 	
 	@Override
-	public void execute(CPU cpu) {
-		int addr = cpu.getPC() + pcOffset;
-		int addr2 = cpu.readMemory(addr) & 0xFFFF;
-		short value = cpu.getRegister(sr);
-		cpu.writeMemory(addr2, value);
+	public void execute(LC3 lc3) {
+		int addr = lc3.getPC() + pcOffset;
+		int addr2 = lc3.readMemory(addr) & 0xFFFF;
+		short value = lc3.getRegister(sr);
+		lc3.writeMemory(addr2, value);
 	}
 
 	public Register getSr() {

@@ -16,7 +16,7 @@ import de.nasskappe.lc3.sim.maschine.cmds.RET;
 import de.nasskappe.lc3.sim.maschine.cmds.RTI;
 import de.nasskappe.lc3.sim.maschine.cmds.TRAP;
 
-public class CPU {
+public class LC3 {
 	public enum State {
 		RUNNING, STOPPED
 	}
@@ -33,14 +33,14 @@ public class CPU {
 	private volatile State state;
 	
 	private CommandFactory cmdFactory;
-	private Set<ICPUListener> listeners;
+	private Set<ILC3Listener> listeners;
 	private Set<Integer> addressBreakpoints;
 	
 	
-	public CPU() {
+	public LC3() {
 		state = State.STOPPED;
 		currentPriority = 0;
-		listeners = new HashSet<ICPUListener>();
+		listeners = new HashSet<ILC3Listener>();
 		cmdFactory = new CommandFactory();
 		mem = new Memory();
 		register = new HashMap<Register, Short>();
@@ -117,6 +117,13 @@ public class CPU {
 		if (newState != state) {
 			State oldState = state;
 			state = newState;
+			
+			if (state == State.RUNNING) {
+				writeMemory(Memory.ADDR_MCR, (short) 0x8000);
+			} else {
+				writeMemory(Memory.ADDR_MCR, (short) 0x0);
+			}
+			
 			fireStateChanged(oldState, newState);
 		}
 	}
@@ -142,9 +149,9 @@ public class CPU {
 		return !isBreakpointSet;
 	}
 
-	private void fireInstructionExecuted(CPU cpu, ICommand cmd) {
-		for(ICPUListener l : listeners) {
-			l.instructionExecuted(cpu, cmd);
+	private void fireInstructionExecuted(LC3 lc3, ICommand cmd) {
+		for(ILC3Listener l : listeners) {
+			l.instructionExecuted(lc3, cmd);
 		}
 	}
 
@@ -193,42 +200,43 @@ public class CPU {
 	public void writeMemory(int addr, short value) {
 		mem.setValue(addr, value);
 		
-		// clock bit
-		if (addr == 0xFFFE && (value & 0x8000) == 0) {
+		// check clock bit (disabled by TRAP 0x25 [HALT])
+		if (addr == Memory.ADDR_MCR && (value & 0x8000) == 0) {
 			setState(State.STOPPED);
 		}
+		
 		fireMemoryChanged(addr, value);
 	}
 
 	private void fireMemoryChanged(int addr, short value) {
-		for (ICPUListener l : listeners) {
+		for (ILC3Listener l : listeners) {
 			l.memoryChanged(this, addr, value);
 		}
 	}
 	
 	private void fireMemoryRead(int addr, short value) {
-		for (ICPUListener l : listeners) {
+		for (ILC3Listener l : listeners) {
 			l.memoryRead(this, addr, value);
 		}
 	}
 	
 	private void fireStateChanged(State oldState, State newState) {
-		for (ICPUListener l : listeners) {
+		for (ILC3Listener l : listeners) {
 			l.stateChanged(this, oldState, newState);
 		}
 	}
 
-	public void addCpuListener(ICPUListener listener) {
+	public void addListener(ILC3Listener listener) {
 		listeners.add(listener);
 		listener.stateChanged(this, state, state);
 	}
 	
-	public boolean removeCpuListener(ICPUListener listener) {
+	public boolean removeListener(ILC3Listener listener) {
 		return listeners.remove(listener);
 	}
 	
 	private void fireRegisterChanged(Register register, short oldValue, short value) {
-		for(ICPUListener l : listeners) {
+		for(ILC3Listener l : listeners) {
 			l.registerChanged(this, register, oldValue, value);
 		}
 	}

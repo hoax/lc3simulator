@@ -1,6 +1,6 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 
 public abstract class AbstractCommand implements ICommand {
 
@@ -9,7 +9,7 @@ public abstract class AbstractCommand implements ICommand {
 	private int codePosition;
 
 	@Override
-	abstract public void execute(CPU cpu);
+	abstract public void execute(LC3 lc3);
 
 	@Override
 	public void init(short code) {

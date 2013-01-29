@@ -2,13 +2,13 @@ package de.nasskappe.lc3.sim.gui;
 
 import javax.swing.table.AbstractTableModel;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
-import de.nasskappe.lc3.sim.maschine.CPU.State;
-import de.nasskappe.lc3.sim.maschine.ICPUListener;
+import de.nasskappe.lc3.sim.maschine.LC3;
+import de.nasskappe.lc3.sim.maschine.LC3.State;
+import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
-public class RegisterTableModel extends AbstractTableModel implements ICPUListener {
+public class RegisterTableModel extends AbstractTableModel implements ILC3Listener {
 
 	private static String[][] LABELS = {
 		{ "R0", "R1", "R2", "R3" },
@@ -16,7 +16,7 @@ public class RegisterTableModel extends AbstractTableModel implements ICPUListen
 		{ "PSR", "PC", "IR", "CC" }
 	};
 	
-	private CPU cpu;
+	private LC3 lc3;
 
 	@Override
 	public int getRowCount() {
@@ -39,29 +39,29 @@ public class RegisterTableModel extends AbstractTableModel implements ICPUListen
 		if (columnIndex == 0 || columnIndex == 2 || columnIndex == 4) {
 			return LABELS[columnIndex/2][rowIndex];
 		} else {
-			if (cpu == null)
+			if (lc3 == null)
 				return null;
 		
 			if (columnIndex == 1) {
 				switch(rowIndex) {
-				case 0 : return cpu.getRegister(Register.R0);
-				case 1 : return cpu.getRegister(Register.R1);
-				case 2 : return cpu.getRegister(Register.R2);
-				case 3 : return cpu.getRegister(Register.R3);
+				case 0 : return lc3.getRegister(Register.R0);
+				case 1 : return lc3.getRegister(Register.R1);
+				case 2 : return lc3.getRegister(Register.R2);
+				case 3 : return lc3.getRegister(Register.R3);
 				}
 			} else if (columnIndex == 3) {
 				switch(rowIndex) {
-				case 0 : return cpu.getRegister(Register.R4);
-				case 1 : return cpu.getRegister(Register.R5);
-				case 2 : return cpu.getRegister(Register.R6);
-				case 3 : return cpu.getRegister(Register.R7);
+				case 0 : return lc3.getRegister(Register.R4);
+				case 1 : return lc3.getRegister(Register.R5);
+				case 2 : return lc3.getRegister(Register.R6);
+				case 3 : return lc3.getRegister(Register.R7);
 				}
 			} else if (columnIndex == 5) {
 				switch(rowIndex) {
-				case 0 : return cpu.getRegister(Register.PSR);
-				case 1 : return cpu.getPC();
-				case 2 : return cpu.getRegister(Register.IR);
-				case 3 : return cpu.getCC();
+				case 0 : return lc3.getRegister(Register.PSR);
+				case 1 : return lc3.getPC();
+				case 2 : return lc3.getRegister(Register.IR);
+				case 3 : return lc3.getCC();
 				}
 			}
 		}
@@ -74,72 +74,72 @@ public class RegisterTableModel extends AbstractTableModel implements ICPUListen
 		if (columnIndex == 1) {
 			switch(rowIndex) {
 			case 0 : 
-				cpu.setRegister(Register.R0, value.shortValue());
+				lc3.setRegister(Register.R0, value.shortValue());
 				break;
 				
 			case 1 : 
-				cpu.setRegister(Register.R1, value.shortValue());
+				lc3.setRegister(Register.R1, value.shortValue());
 				break;
 				
 			case 2 : 
-				cpu.setRegister(Register.R2, value.shortValue());
+				lc3.setRegister(Register.R2, value.shortValue());
 				break;
 				
 			case 3 : 
-				cpu.setRegister(Register.R3, value.shortValue());
+				lc3.setRegister(Register.R3, value.shortValue());
 				break;
 			}
 		} else if (columnIndex == 3) {
 			switch(rowIndex) {
 			case 0 : 
-				cpu.setRegister(Register.R4, value.shortValue());
+				lc3.setRegister(Register.R4, value.shortValue());
 				break;
 				
 			case 1 : 
-				cpu.setRegister(Register.R5, value.shortValue());
+				lc3.setRegister(Register.R5, value.shortValue());
 				break;
 				
 			case 2 : 
-				cpu.setRegister(Register.R6, value.shortValue());
+				lc3.setRegister(Register.R6, value.shortValue());
 				break;
 				
 			case 3 : 
-				cpu.setRegister(Register.R7, value.shortValue());
+				lc3.setRegister(Register.R7, value.shortValue());
 				break;
 			}
 		} else if (columnIndex == 5) {
 			switch(rowIndex) {
 			case 0 : 
-				cpu.setRegister(Register.PSR, value.shortValue());
+				lc3.setRegister(Register.PSR, value.shortValue());
 				break;
 				
 			case 1 : 
-				cpu.setPC(value.intValue() & 0xffff);
+				lc3.setPC(value.intValue() & 0xffff);
 				break;
 				
 			case 2 : 
-				cpu.setRegister(Register.IR, value.shortValue());
+				lc3.setRegister(Register.IR, value.shortValue());
 				break;
 				
 			case 3 : 
-				cpu.getCC();
+				lc3.getCC();
 				break;
 			}
 		}
 	}
 
 	@Override
-	public void registerChanged(CPU cpu, Register r, short oldValue, short value) {
-		this.cpu = cpu;
+	public void registerChanged(LC3 lc3, Register r, short oldValue, short value) {
+		this.lc3 = lc3;
 		fireTableDataChanged();
 	}
 
 	@Override
-	public void instructionExecuted(CPU cpu, ICommand cmd) {
+	public void instructionExecuted(LC3 lc3, ICommand cmd) {
 	}
 
 	@Override
-	public void memoryChanged(CPU cpu, int addr, short value) {
+	public void memoryChanged(LC3 lc3, int addr, short value) {
 	}
 	
 	@Override
@@ -151,11 +151,11 @@ public class RegisterTableModel extends AbstractTableModel implements ICPUListen
 	}
 
 	@Override
-	public void stateChanged(CPU cpu, State oldState, State newState) {
+	public void stateChanged(LC3 lc3, State oldState, State newState) {
 	}
 
 	@Override
-	public void memoryRead(CPU cpu, int addr, short value) {
+	public void memoryRead(LC3 lc3, int addr, short value) {
 	}
 	
 }

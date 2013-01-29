@@ -5,15 +5,15 @@ import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
-import de.nasskappe.lc3.sim.maschine.CPU.State;
-import de.nasskappe.lc3.sim.maschine.ICPUListener;
+import de.nasskappe.lc3.sim.maschine.LC3;
+import de.nasskappe.lc3.sim.maschine.LC3.State;
+import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.BR;
 import de.nasskappe.lc3.sim.maschine.cmds.CommandFactory;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
-public class CodeTableModel extends AbstractTableModel implements ICPUListener {
+public class CodeTableModel extends AbstractTableModel implements ILC3Listener {
 
 	private final static String[] COLUMNS = {
 		"", "address", "binary", "hex", "ASM"
@@ -23,10 +23,10 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 	
 	private Map<Integer, ICommand> row2cmd = new HashMap<Integer, ICommand>(128);
 	private CommandFactory factory = new CommandFactory();
-	private CPU cpu;
+	private LC3 lc3;
 	
-	public CodeTableModel(CPU cpu) {
-		this.cpu = cpu;
+	public CodeTableModel(LC3 lc3) {
+		this.lc3 = lc3;
 	}
 	
 	@Override
@@ -57,7 +57,7 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 			}
 		} else {
 			switch(columnIndex) {
-			case 0: return cpu.isBreakpointSetFor(rowIndex);
+			case 0: return lc3.isBreakpointSetFor(rowIndex);
 			case 1: return rowIndex;
 			case 2: return cmd.getCode();
 			case 3: return cmd.getCode();
@@ -80,14 +80,14 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 
 		switch(columnIndex) {
 		case 0:
-			cpu.setAddressBreakpoint(rowIndex, (Boolean) aValue);
+			lc3.setAddressBreakpoint(rowIndex, (Boolean) aValue);
 			fireTableRowsUpdated(rowIndex, rowIndex);
 			break;
 		}
 	}
 
 	@Override
-	public void registerChanged(CPU cpu, Register r, short oldValue, short value) {
+	public void registerChanged(LC3 lc3, Register r, short oldValue, short value) {
 		if (r == Register.PC) {
 			int pc = ((int)value) & 0xffff;
 			int oldPC = ((int)oldValue) & 0xffff;
@@ -98,11 +98,11 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 	}
 
 	@Override
-	public void instructionExecuted(CPU cpu, ICommand cmd) {
+	public void instructionExecuted(LC3 lc3, ICommand cmd) {
 	}
 
 	@Override
-	public void memoryChanged(CPU cpu, int addr, short value) {
+	public void memoryChanged(LC3 lc3, int addr, short value) {
 		if (value == 0) {
 			row2cmd.remove((Integer) addr);
 		} else {
@@ -113,11 +113,11 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 	}
 
 	@Override
-	public void stateChanged(CPU cpu, State oldState, State newState) {
+	public void stateChanged(LC3 lc3, State oldState, State newState) {
 	}
 
 	@Override
-	public void memoryRead(CPU cpu, int addr, short value) {
+	public void memoryRead(LC3 lc3, int addr, short value) {
 	}
 	
 }

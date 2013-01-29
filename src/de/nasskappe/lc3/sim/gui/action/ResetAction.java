@@ -6,20 +6,20 @@ import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 
 import de.nasskappe.lc3.sim.gui.MainWindow;
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 
 public class ResetAction extends AbstractAction {
 
-	private CPU cpu;
+	private LC3 lc3;
 
 
-	public ResetAction(CPU cpu) {
+	public ResetAction(LC3 lc3) {
 
-		this.cpu = cpu;
+		this.lc3 = lc3;
 		ImageIcon icon = new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/pause.gif"));
 
 		putValue(NAME, "reset");
-		putValue(SHORT_DESCRIPTION, "resets the cpus memory & register values");
+		putValue(SHORT_DESCRIPTION, "resets the lc3s memory & register values");
 		putValue(SMALL_ICON, icon);
 		putValue(ACTION_COMMAND_KEY, "reset");
 		putValue(MNEMONIC_KEY, (int)'s');
@@ -28,7 +28,7 @@ public class ResetAction extends AbstractAction {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		cpu.reset();
+		lc3.reset();
 	}
 
 }

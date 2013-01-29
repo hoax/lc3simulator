@@ -15,23 +15,23 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.BadLocationException;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
-import de.nasskappe.lc3.sim.maschine.CPU.State;
-import de.nasskappe.lc3.sim.maschine.ICPUListener;
+import de.nasskappe.lc3.sim.maschine.LC3;
+import de.nasskappe.lc3.sim.maschine.LC3.State;
+import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.IDisplay;
 import de.nasskappe.lc3.sim.maschine.Memory;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
-public class ConsoleWindow extends JDialog implements IDisplay, ICPUListener {
+public class ConsoleWindow extends JDialog implements IDisplay, ILC3Listener {
 
 	private JTextArea textArea;
-	private CPU cpu;
+	private LC3 lc3;
 	private volatile boolean displayBusy;
 
-	public ConsoleWindow(CPU cpu, Window parent) {
+	public ConsoleWindow(LC3 lc3, Window parent) {
 		super(parent);
-		this.cpu = cpu;
+		this.lc3 = lc3;
 		setModal(false);
 		
 		setTitle("Console");
@@ -55,15 +55,15 @@ public class ConsoleWindow extends JDialog implements IDisplay, ICPUListener {
 		setPreferredSize(new Dimension(400, 400));
 		pack();
 		
-		cpu.addCpuListener(this);
-		setDisplayReady(cpu);
+		lc3.addListener(this);
+		setDisplayReady(lc3);
 	}
 
 	protected void handleKeypress(KeyEvent e) {
-		if (cpu != null) {
-			int kbsr = cpu.readMemory(Memory.ADDR_KBSR);
+		if (lc3 != null) {
+			int kbsr = lc3.readMemory(Memory.ADDR_KBSR);
 			if ((kbsr & (1 << 15)) == 0) {
-				cpu.writeMemory(Memory.ADDR_KBDR, (short) (e.getKeyChar() & 0xFF));
+				lc3.writeMemory(Memory.ADDR_KBDR, (short) (e.getKeyChar() & 0xFF));
 				setKeyboardReady();
 			}
 		}
@@ -99,26 +99,26 @@ public class ConsoleWindow extends JDialog implements IDisplay, ICPUListener {
 	}
 	
 	@Override
-	public void registerChanged(CPU cpu, Register r, short oldValue, short value) {
+	public void registerChanged(LC3 lc3, Register r, short oldValue, short value) {
 	}
 
 	@Override
-	public void instructionExecuted(CPU cpu, ICommand cmd) {
+	public void instructionExecuted(LC3 lc3, ICommand cmd) {
 	}
 	
 	@Override
-	public void memoryChanged(final CPU cpu, int addr, final short value) {
+	public void memoryChanged(final LC3 lc3, int addr, final short value) {
 		// output character to display
 		if (addr == Memory.ADDR_DDR) {
 			if (isDisplayReady() && value != 0) {
-				setDisplayBusy(cpu);
+				setDisplayBusy(lc3);
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
 						// output character
 						outputCharacter((char) (value & 0xFF));
 
-						setDisplayReady(cpu);
+						setDisplayReady(lc3);
 					}
 				});
 			}
@@ -126,47 +126,47 @@ public class ConsoleWindow extends JDialog implements IDisplay, ICPUListener {
 			boolean mBusy = (value & 0x8000) == 0;
 			if (mBusy != displayBusy) {
 				if (displayBusy) {
-					setDisplayBusy(cpu);
+					setDisplayBusy(lc3);
 				} else {
-					setDisplayReady(cpu);
+					setDisplayReady(lc3);
 				}
 			}
 		}
 	}
 
 	@Override
-	public void stateChanged(CPU cpu, State oldState, State newState) {
+	public void stateChanged(LC3 lc3, State oldState, State newState) {
 	}
 
 	private boolean isDisplayReady() {
 		return !displayBusy;
 	}
 	
-	private void setDisplayReady(CPU cpu) {
+	private void setDisplayReady(LC3 lc3) {
 		// display ready
 		displayBusy = false;
-		cpu.writeMemory(Memory.ADDR_DSR, (short) 0x8000);
+		lc3.writeMemory(Memory.ADDR_DSR, (short) 0x8000);
 	}
 	
-	private void setDisplayBusy(CPU cpu) {
+	private void setDisplayBusy(LC3 lc3) {
 		// display busy
 		displayBusy = true;
-		cpu.writeMemory(Memory.ADDR_DSR, (short) 0);
+		lc3.writeMemory(Memory.ADDR_DSR, (short) 0);
 	}
 
 	@Override
-	public void memoryRead(CPU cpu, int addr, short value) {
+	public void memoryRead(LC3 lc3, int addr, short value) {
 		if (addr == Memory.ADDR_KBDR) {
 			setKeyboardBusy();
 		}
 	}
 
 	private void setKeyboardBusy() {
-		cpu.writeMemory(Memory.ADDR_KBSR, (short) 0x0000);
+		lc3.writeMemory(Memory.ADDR_KBSR, (short) 0x0000);
 	}
 
 	private void setKeyboardReady() {
-		cpu.writeMemory(Memory.ADDR_KBSR, (short) 0x8000);
+		lc3.writeMemory(Memory.ADDR_KBSR, (short) 0x8000);
 	}
 
 	

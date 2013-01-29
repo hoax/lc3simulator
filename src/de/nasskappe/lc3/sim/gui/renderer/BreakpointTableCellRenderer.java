@@ -7,14 +7,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 
 public class BreakpointTableCellRenderer extends DefaultCodeTableCellRenderer {
 
 	private ImageIcon breakpointImage;
 
-	public BreakpointTableCellRenderer(CPU cpu, JTable table) {
-		super(cpu);
+	public BreakpointTableCellRenderer(LC3 lc3, JTable table) {
+		super(lc3);
 		breakpointImage = new ImageIcon(getClass().getResource("breakpoint.png"));
 		int height = table.getRowHeight() - 4;
 		breakpointImage =  new ImageIcon(breakpointImage.getImage().getScaledInstance(height, height, 0));

@@ -5,7 +5,7 @@ import java.awt.Component;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 
 public class Binary16TableCellRenderer extends DefaultCodeTableCellRenderer {
 
@@ -13,8 +13,8 @@ public class Binary16TableCellRenderer extends DefaultCodeTableCellRenderer {
 
 	private StringBuilder sb = new StringBuilder();
 	
-	public Binary16TableCellRenderer(CPU cpu) {
-		super(cpu);
+	public Binary16TableCellRenderer(LC3 lc3) {
+		super(lc3);
 	}
 	
 	public Component getTableCellRendererComponent(JTable table, Object value,

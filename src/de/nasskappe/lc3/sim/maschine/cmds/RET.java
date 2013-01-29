@@ -1,6 +1,6 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.Register;
 
 public class RET extends AbstractCommand {
@@ -15,9 +15,9 @@ public class RET extends AbstractCommand {
 	}
 	
 	@Override
-	public void execute(CPU cpu) {
-		short addr = cpu.getRegister(Register.R7);
-		cpu.setPC(addr);
+	public void execute(LC3 lc3) {
+		short addr = lc3.getRegister(Register.R7);
+		lc3.setPC(addr);
 	}
 
 	@Override

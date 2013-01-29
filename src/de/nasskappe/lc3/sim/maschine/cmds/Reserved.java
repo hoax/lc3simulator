@@ -1,11 +1,11 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
-import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.LC3;
 
 public class Reserved extends AbstractCommand {
 
 	@Override
-	public void execute(CPU cpu) {
+	public void execute(LC3 lc3) {
 	}
 
 	@Override
