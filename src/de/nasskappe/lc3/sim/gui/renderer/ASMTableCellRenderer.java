@@ -228,9 +228,37 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 		@Override
 		public Object visit(TRAP cmd) {
 			sb.setLength(0);
-			sb.append(cmd.getASM());
-			sb.append(" ");
-			sb.append(toHexString(cmd.getTrap()));
+			
+			switch (cmd.getTrap()) {
+			case 0x20: 
+				sb.append("GETC");
+				break;
+			case 0x21: 
+				sb.append("OUT");
+				break;
+				
+			case 0x22: 
+				sb.append("PUTS");
+				break;
+				
+			case 0x23: 
+				sb.append("IN");
+				break;
+				
+			case 0x24: 
+				sb.append("PUTSP");
+				break;
+				
+			case 0x25: 
+				sb.append("HALT");
+				break;
+				
+			default:
+				sb.append(cmd.getASM());
+				sb.append(" ");
+				sb.append(toHexString(cmd.getTrap()));
+				break;
+			}
 			
 			return sb.toString();
 		}
