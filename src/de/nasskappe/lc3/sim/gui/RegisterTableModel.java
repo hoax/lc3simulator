@@ -3,6 +3,7 @@ package de.nasskappe.lc3.sim.gui;
 import javax.swing.table.AbstractTableModel;
 
 import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.CPU.State;
 import de.nasskappe.lc3.sim.maschine.ICPUListener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
@@ -147,6 +148,10 @@ public class RegisterTableModel extends AbstractTableModel implements ICPUListen
 			return Integer.class;
 		
 		return super.getColumnClass(columnIndex);
+	}
+
+	@Override
+	public void stateChanged(CPU cpu, State oldState, State newState) {
 	}
 
 	

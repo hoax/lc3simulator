@@ -6,88 +6,95 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import de.nasskappe.lc3.sim.maschine.CPU;
-import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
-import de.nasskappe.lc3.sim.maschine.cmds.JSR;
-import de.nasskappe.lc3.sim.maschine.cmds.RET;
-import de.nasskappe.lc3.sim.maschine.cmds.RTI;
-import de.nasskappe.lc3.sim.maschine.cmds.TRAP;
 
 public class CpuUtils {
 
 	private abstract class AbstractCpuAction implements Runnable {
+		
+		private Runnable postExecute;
+
+		public AbstractCpuAction(Runnable postExecute) {
+			this.postExecute = postExecute;
+		}
+
+		@Override
+		public void run() {
+			execute();
+			if (postExecute != null)
+				postExecute.run();
+		}
+		
+		abstract void execute();
 	}
 	
 	private class RunAction extends AbstractCpuAction {
+		public RunAction(Runnable postExecute) {
+			super(postExecute);
+		}
+
 		@Override
-		public void run() {
-			ICommand lastCmd = null;
-			while(!pause && (!cpu.isBreakpointSetFor(cpu.getPC()) || lastCmd == null)) {
-				lastCmd = cpu.step();
-			}
-			pause = false;
+		public void execute() {
+			cpu.run();
 		}
 	}
 	
 	private class StepIntoAction extends AbstractCpuAction {
+		public StepIntoAction(Runnable postExecute) {
+			super(postExecute);
+		}
+
 		@Override
-		public void run() {
+		public void execute() {
 			cpu.step();
 		}
 	}
 	
 	private class StepOverAction extends AbstractCpuAction {
+		public StepOverAction(Runnable postExecute) {
+			super(postExecute);
+		}
+
 		@Override
-		public void run() {
-			int oldPC = cpu.getPC();
-			
-			ICommand lastCmd = cpu.step();
-			if (lastCmd.getClass() == JSR.class
-					|| lastCmd.getClass() == TRAP.class) {
-				while(!pause && (oldPC + 1) != cpu.getPC() && !cpu.isBreakpointSetFor(cpu.getPC())) {
-					lastCmd = cpu.step();
-				}
-				pause = false;
-			}
+		public void execute() {
+			cpu.stepOver();
 		}
 	}
 	
 	private class StepReturnAction extends AbstractCpuAction {
+		public StepReturnAction(Runnable postExecute) {
+			super(postExecute);
+		}
+
 		@Override
-		public void run() {
-			ICommand lastCmd = null;
-			while(!pause && (!cpu.isBreakpointSetFor(cpu.getPC()) || lastCmd == null) 
-					&& (lastCmd == null || !(lastCmd.getClass() == RET.class || lastCmd.getClass() == RTI.class))) {
-				lastCmd = cpu.step();
-			}
-			pause = false;
+		public void execute() {
+			cpu.stepReturn();
 		}
 	}
 	
 	private ExecutorService executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>());
-	private volatile boolean pause = false;
 	private CPU cpu;
 	
 	public CpuUtils(CPU cpu) {
 		this.cpu = cpu;
 	}
 
-	public void run() {
-		executor.execute(new RunAction());
+	public void run(Runnable postExecute) {
+		executor.execute(new RunAction(postExecute));
 	}
 	
-	public void step() {
-		executor.execute(new StepIntoAction());
+	public void step(Runnable postExecute) {
+		executor.execute(new StepIntoAction(postExecute));
 	}
 	
-	public void stepOver() {
-		executor.execute(new StepOverAction());
+	public void stepOver(Runnable postExecute) {
+		executor.execute(new StepOverAction(postExecute));
 	}
 	
-	public void stepReturn() {
-		executor.execute(new StepReturnAction());
+	public void stepReturn(Runnable postExecute) {
+		executor.execute(new StepReturnAction(postExecute));
 	}
 
 	public void pause() {
-		pause = true;
+		cpu.setState(CPU.State.STOPPED);
 	}
 }

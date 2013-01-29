@@ -33,14 +33,16 @@ public class HexNumberComboBoxModel extends AbstractListModel<String> implements
 
 			int number = NumberUtils.stringToInt(anObject.toString());
 			
-			selectedObject = anObject;
+			selectedObject = formatter.format(number);
 			
-			addAddress(number);
+			fireContentsChanged(this, 0, getSize() - 1);
+
 		}
 	}
 
-	public void addAddress(Integer anObject) {
-		String s = formatter.format(anObject);
+	public void addAddress(Object anObject) {
+		int number = NumberUtils.stringToInt(anObject.toString());
+		String s = formatter.format(number);
 		if (!addresses.contains(s)) {
 			addresses.add(s);
 			Collections.sort(addresses);

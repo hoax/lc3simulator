@@ -5,7 +5,7 @@ public class Memory {
 	private short[] mem;
 	
 	public Memory() {
-		mem = new short[0xffff];
+		mem = new short[0x10000];
 	}
 	
 	short getValue(int addr) {

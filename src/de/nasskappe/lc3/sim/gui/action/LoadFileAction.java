@@ -1,5 +1,6 @@
 package de.nasskappe.lc3.sim.gui.action;
 
+import java.awt.EventQueue;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -13,8 +14,12 @@ import javax.swing.JFileChooser;
 
 import de.nasskappe.lc3.sim.gui.MainWindow;
 import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.CPU.State;
+import de.nasskappe.lc3.sim.maschine.ICPUListener;
+import de.nasskappe.lc3.sim.maschine.Register;
+import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
-public class LoadFileAction extends AbstractAction {
+public class LoadFileAction extends AbstractAction implements ICPUListener {
 
 	JFileChooser fc;
 	Window window;
@@ -57,6 +62,28 @@ public class LoadFileAction extends AbstractAction {
 		
 		cpu.loadData(addr, input);
 		cpu.setPC(addr);
+	}
+
+	@Override
+	public void registerChanged(CPU cpu, Register r, short oldValue, short value) {
+	}
+
+	@Override
+	public void instructionExecuted(CPU cpu, ICommand cmd) {
+	}
+
+	@Override
+	public void memoryChanged(CPU cpu, int addr, short value) {
+	}
+
+	@Override
+	public void stateChanged(CPU cpu, State oldState, final State newState) {
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				setEnabled(newState == State.STOPPED);
+			}
+		});
 	}
 
 }

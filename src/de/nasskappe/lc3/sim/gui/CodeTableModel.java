@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 
 import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.CPU.State;
 import de.nasskappe.lc3.sim.maschine.ICPUListener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.BR;
@@ -105,6 +106,10 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 		ICommand cmd = factory.createCommand(value, addr);
 		row2cmd.put(addr, cmd);
 		fireTableRowsUpdated(addr, addr);
+	}
+
+	@Override
+	public void stateChanged(CPU cpu, State oldState, State newState) {
 	}
 	
 }

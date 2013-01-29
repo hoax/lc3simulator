@@ -13,6 +13,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
@@ -41,6 +42,7 @@ import de.nasskappe.lc3.sim.gui.action.DebuggerRunAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepIntoAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepOverAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepReturnAction;
+import de.nasskappe.lc3.sim.gui.action.DebuggerStopAction;
 import de.nasskappe.lc3.sim.gui.action.LoadFileAction;
 import de.nasskappe.lc3.sim.gui.editor.NumberCellEditor;
 import de.nasskappe.lc3.sim.gui.renderer.ASMTableCellRenderer;
@@ -49,6 +51,7 @@ import de.nasskappe.lc3.sim.gui.renderer.BreakpointTableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.Hex16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.LabelTableCellRenderer;
 import de.nasskappe.lc3.sim.maschine.CPU;
+import de.nasskappe.lc3.sim.maschine.CPU.State;
 import de.nasskappe.lc3.sim.maschine.ICPUListener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
@@ -61,6 +64,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 	private JTable codeTable;
 	private LoadFileAction loadFileAction;
 	private DebuggerRunAction runAction;
+	private DebuggerStopAction stopAction;
 	private DebuggerStepIntoAction stepIntoAction;
 	private DebuggerStepOverAction stepOverAction;
 	private DebuggerStepReturnAction stepReturnAction;
@@ -69,6 +73,23 @@ public class MainWindow extends JFrame implements ICPUListener {
 	private JComboBox<String> currentAddressBox;
 	private HexNumberComboBoxModel addressModel;
 	private CpuUtils cpuUtils;
+	
+	private Runnable scrollToPcRunnable = new Runnable() {
+		@Override
+		public void run() {
+			if (EventQueue.isDispatchThread()) {
+				scrollToPC();
+			} else {
+				try {
+					EventQueue.invokeAndWait(this);
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	};
 	
 	/**
 	 * Launch the application.
@@ -100,10 +121,18 @@ public class MainWindow extends JFrame implements ICPUListener {
 		setBounds(100, 100, 450, 484);
 		
 		loadFileAction = new LoadFileAction(this, cpu);
-		runAction = new DebuggerRunAction(cpuUtils);
-		stepIntoAction = new DebuggerStepIntoAction(cpuUtils);
-		stepOverAction = new DebuggerStepOverAction(cpuUtils);
-		stepReturnAction = new DebuggerStepReturnAction(cpuUtils);
+		runAction = new DebuggerRunAction(cpuUtils, scrollToPcRunnable);
+		stopAction = new DebuggerStopAction(cpuUtils);
+		stepIntoAction = new DebuggerStepIntoAction(cpuUtils, scrollToPcRunnable);
+		stepOverAction = new DebuggerStepOverAction(cpuUtils, scrollToPcRunnable);
+		stepReturnAction = new DebuggerStepReturnAction(cpuUtils, scrollToPcRunnable);
+		
+		cpu.addCpuListener(loadFileAction);
+		cpu.addCpuListener(runAction);
+		cpu.addCpuListener(stopAction);
+		cpu.addCpuListener(stepIntoAction);
+		cpu.addCpuListener(stepOverAction);
+		cpu.addCpuListener(stepReturnAction);
 		
 		JMenuBar menuBar = createMenuBar();
 		setJMenuBar(menuBar);
@@ -190,6 +219,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 		panel.add(lblCurrentAddress, gbc_lblCurrentAddress);
 		
 		addressModel = new HexNumberComboBoxModel();
+		addressModel.addAddress("0x3000");
 		currentAddressBox = new JComboBox<String>(addressModel);
 		currentAddressBox.setEditable(true);
 		GridBagConstraints gbc_currentAddressBox = new GridBagConstraints();
@@ -202,6 +232,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 		btnGo = new JButton("go");
 		btnGo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				addressModel.addAddress(currentAddressBox.getSelectedItem());
 				goToAddress(currentAddressBox.getSelectedItem().toString());
 			}
 		});
@@ -310,6 +341,7 @@ public class MainWindow extends JFrame implements ICPUListener {
 		file.add(separator);
 		
 		JMenuItem exit = new JMenuItem("Exit");
+		exit.setMnemonic('X');
 		exit.setAccelerator(KeyStroke.getKeyStroke("control X"));
 		exit.addActionListener(new ActionListener() {
 			@Override
@@ -327,6 +359,10 @@ public class MainWindow extends JFrame implements ICPUListener {
 		JMenuItem runBtn = new JMenuItem(runAction);
 		runBtn.setAccelerator(KeyStroke.getKeyStroke("F8"));
 		debugMenu.add(runBtn);
+		
+		JMenuItem stopBtn = new JMenuItem(stopAction);
+		stopBtn.setAccelerator(KeyStroke.getKeyStroke("F9"));
+		debugMenu.add(stopBtn);
 		
 		JMenuItem stepIntoBtn = new JMenuItem(stepIntoAction);
 		stepIntoBtn.setAccelerator(KeyStroke.getKeyStroke("F5"));
@@ -421,12 +457,18 @@ public class MainWindow extends JFrame implements ICPUListener {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				if (!e.getValueIsAdjusting()) {
+					updateAddressField();
 					updateCurrentValueField();
 				}
 			}
 		});
 
 		return table;
+	}
+	
+	private void updateAddressField() {
+		int row = codeTable.getSelectedRow();
+		addressModel.setSelectedItem(""+row);
 	}
 
 	private void updateCurrentValueField() {
@@ -452,6 +494,10 @@ public class MainWindow extends JFrame implements ICPUListener {
 		JButton btnRun = new JButton(runAction);
 		btnRun.setHideActionText(true);
 		toolBar.add(btnRun);
+		
+		JButton btnStop = new JButton(stopAction);
+		btnStop.setHideActionText(true);
+		toolBar.add(btnStop);
 		
 		JButton btnStepInto = new JButton(stepIntoAction);
 		btnStepInto.setHideActionText(true);
@@ -491,14 +537,22 @@ public class MainWindow extends JFrame implements ICPUListener {
 
 	@Override
 	public void instructionExecuted(CPU cpu, ICommand cmd) {
-		scrollToPC();
 	}
 
 	@Override
 	public void memoryChanged(CPU cpu, int addr, short value) {
 		if (addr == codeTable.getSelectedRow()) {
-			updateCurrentValueField();
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					updateCurrentValueField();
+				}
+			});
 		}
+	}
+
+	@Override
+	public void stateChanged(CPU cpu, State oldState, State newState) {
 	}
 
 }

@@ -15,28 +15,26 @@ import de.nasskappe.lc3.sim.maschine.ICPUListener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
-public class DebuggerStepOverAction extends AbstractAction implements ICPUListener {
+public class DebuggerStopAction extends AbstractAction implements ICPUListener {
 
 	private Icon icon;
 	private CpuUtils utils;
-	private Runnable postExecute;
 
-	public DebuggerStepOverAction(CpuUtils utils, Runnable postExecute) {
+	public DebuggerStopAction(CpuUtils utils) {
 		this.utils = utils;
-		this.postExecute = postExecute;
 
-		icon = new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/stepover.gif"));
+		icon = new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/pause.gif"));
 
-		putValue(NAME, "step over");
-		putValue(SHORT_DESCRIPTION, "step over");
+		putValue(NAME, "pause");
+		putValue(SHORT_DESCRIPTION, "stops cpu");
 		putValue(SMALL_ICON, icon);
-		putValue(ACTION_COMMAND_KEY, "debugger_step_over");
-		putValue(MNEMONIC_KEY, (int)'V');
+		putValue(ACTION_COMMAND_KEY, "debugger_stop");
+		putValue(MNEMONIC_KEY, (int)'P');
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		utils.stepOver(postExecute);
+		utils.pause();
 	}
 
 	@Override
@@ -56,7 +54,7 @@ public class DebuggerStepOverAction extends AbstractAction implements ICPUListen
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				setEnabled(newState == State.STOPPED);
+				setEnabled(newState == State.RUNNING);
 			}
 		});
 	}
