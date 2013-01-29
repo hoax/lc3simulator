@@ -15,15 +15,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.BadLocationException;
 
+import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.LC3.State;
-import de.nasskappe.lc3.sim.maschine.ILC3Listener;
-import de.nasskappe.lc3.sim.maschine.IDisplay;
 import de.nasskappe.lc3.sim.maschine.Memory;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
-public class ConsoleWindow extends JDialog implements IDisplay, ILC3Listener {
+public class ConsoleWindow extends JDialog implements ILC3Listener {
 
 	private JTextArea textArea;
 	private LC3 lc3;
@@ -85,7 +84,6 @@ public class ConsoleWindow extends JDialog implements IDisplay, ILC3Listener {
 		d.outputCharacter('h');
 	}
 
-	@Override
 	public void outputCharacter(char c) {
 		try {
 			textArea.getDocument().insertString(textArea.getDocument().getLength(),  ""+c, null);
