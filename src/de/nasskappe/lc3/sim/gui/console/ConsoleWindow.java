@@ -80,4 +80,8 @@ public class ConsoleWindow extends JDialog implements IDisplay {
 		}
 	}
 	
+	public void setKeyboardListener(IKeyboardListener listener) {
+		this.keyboardListener = listener;
+	}
+	
 }
