@@ -26,6 +26,7 @@ public class ConsoleWindow extends JDialog implements IDisplay {
 		super(parent);
 		setModal(false);
 		
+		setTitle("Console");
 		setLayout(new BorderLayout());
 
 		textArea = new JTextArea();
@@ -44,6 +45,7 @@ public class ConsoleWindow extends JDialog implements IDisplay {
 		add(new JScrollPane(textArea), BorderLayout.CENTER);
 		
 		setPreferredSize(new Dimension(400, 400));
+		pack();
 	}
 
 	protected void handleKeypress(KeyEvent e) {

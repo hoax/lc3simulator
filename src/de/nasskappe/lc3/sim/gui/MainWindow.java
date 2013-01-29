@@ -44,6 +44,8 @@ import de.nasskappe.lc3.sim.gui.action.DebuggerStepOverAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepReturnAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStopAction;
 import de.nasskappe.lc3.sim.gui.action.LoadFileAction;
+import de.nasskappe.lc3.sim.gui.action.ShowConsoleAction;
+import de.nasskappe.lc3.sim.gui.console.ConsoleWindow;
 import de.nasskappe.lc3.sim.gui.editor.NumberCellEditor;
 import de.nasskappe.lc3.sim.gui.renderer.ASMTableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.Binary16TableCellRenderer;
@@ -68,11 +70,14 @@ public class MainWindow extends JFrame implements ICPUListener {
 	private DebuggerStepIntoAction stepIntoAction;
 	private DebuggerStepOverAction stepOverAction;
 	private DebuggerStepReturnAction stepReturnAction;
+	private ShowConsoleAction showConsoleAction;
+	
 	private JNumberField currentValueField;
 	private JButton btnGo;
 	private JComboBox<String> currentAddressBox;
 	private HexNumberComboBoxModel addressModel;
 	private CpuUtils cpuUtils;
+	private ConsoleWindow console;
 	
 	private Runnable scrollToPcRunnable = new Runnable() {
 		@Override
@@ -120,6 +125,10 @@ public class MainWindow extends JFrame implements ICPUListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 484);
 		
+		console = new ConsoleWindow(this);
+		console.setAlwaysOnTop(true);
+		
+		showConsoleAction = new ShowConsoleAction(console);
 		loadFileAction = new LoadFileAction(this, cpu);
 		runAction = new DebuggerRunAction(cpuUtils, scrollToPcRunnable);
 		stopAction = new DebuggerStopAction(cpuUtils);
@@ -325,8 +334,18 @@ public class MainWindow extends JFrame implements ICPUListener {
 		
 		createFileMenu(menuBar);
 		createDebugMenu(menuBar);
+		createWindowMenu(menuBar);
 
 		return menuBar;
+	}
+	
+	private void createWindowMenu(JMenuBar menuBar) {
+		JMenu window = new JMenu("Window");
+		menuBar.add(window);
+		
+		JMenuItem console = new JMenuItem(showConsoleAction);
+		console.setAccelerator(KeyStroke.getKeyStroke("control alt C"));
+		window.add(console);
 	}
 	
 	private void createFileMenu(JMenuBar menuBar) {
