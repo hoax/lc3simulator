@@ -61,4 +61,8 @@ public class DebuggerStepReturnAction extends AbstractAction implements ICPUList
 		});
 	}
 
+	@Override
+	public void memoryRead(CPU cpu, int addr, short value) {
+	}
+
 }

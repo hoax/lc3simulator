@@ -111,5 +111,9 @@ public class CodeTableModel extends AbstractTableModel implements ICPUListener {
 	@Override
 	public void stateChanged(CPU cpu, State oldState, State newState) {
 	}
+
+	@Override
+	public void memoryRead(CPU cpu, int addr, short value) {
+	}
 	
 }

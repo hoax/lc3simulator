@@ -55,7 +55,6 @@ import de.nasskappe.lc3.sim.gui.renderer.LabelTableCellRenderer;
 import de.nasskappe.lc3.sim.maschine.CPU;
 import de.nasskappe.lc3.sim.maschine.CPU.State;
 import de.nasskappe.lc3.sim.maschine.ICPUListener;
-import de.nasskappe.lc3.sim.maschine.IKeyboardListener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
@@ -126,6 +125,13 @@ public class MainWindow extends JFrame implements ICPUListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 484);
 		
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setLayout(new BorderLayout(0, 0));
+		setContentPane(contentPane);
+		
+		createMainPanel();
+		
 		console = createConsole();
 		
 		showConsoleAction = new ShowConsoleAction(console);
@@ -145,15 +151,9 @@ public class MainWindow extends JFrame implements ICPUListener {
 		
 		JMenuBar menuBar = createMenuBar();
 		setJMenuBar(menuBar);
-		
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		contentPane.setLayout(new BorderLayout(0, 0));
-		setContentPane(contentPane);
-		
+				
 		createTopPanel();
-		createMainPanel();
-		
+
 		scrollToPC();
 
 		codeTable.getSelectionModel().setSelectionInterval(0x3000, 0x3000);
@@ -161,20 +161,9 @@ public class MainWindow extends JFrame implements ICPUListener {
 	}
 	
 	private ConsoleWindow createConsole() {
-		ConsoleWindow console = new ConsoleWindow(this);
+		ConsoleWindow console = new ConsoleWindow(cpu, this);
 		console.setAlwaysOnTop(true);
-		
-		console.setKeyboardListener(new IKeyboardListener() {
-			@Override
-			public void keyPressed(char key) {
-				int kbsr = cpu.readMemory(0xFE00);
-				if ((kbsr & (1 << 15)) == 0) {
-					cpu.writeMemory(0xFE02, (short) (key & 0xFF));
-					cpu.writeMemory(0xFE00, (short) 0x8000);
-				}
-			}
-		});
-		
+				
 		return console;
 	}
 	
@@ -587,28 +576,14 @@ public class MainWindow extends JFrame implements ICPUListener {
 				}
 			});
 		}
-		
-		// output character to display
-		if (addr == 0xFE06) {
-			int dsr = cpu.readMemory(0xFE04);
-			if ((dsr & (1 << 15)) != 0) {
-				cpu.writeMemory(0xFE04, (short) 0); // display busy
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						// output character
-						console.outputCharacter((char) (value & 0xFF));
-						
-						// display ready
-						cpu.writeMemory(0xFE04, (short) 0x8000);
-					}
-				});
-			}
-		}
 	}
 
 	@Override
 	public void stateChanged(CPU cpu, State oldState, State newState) {
+	}
+
+	@Override
+	public void memoryRead(CPU cpu, int addr, short value) {
 	}
 
 }

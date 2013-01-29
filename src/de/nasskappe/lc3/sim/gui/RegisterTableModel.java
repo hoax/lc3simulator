@@ -154,5 +154,8 @@ public class RegisterTableModel extends AbstractTableModel implements ICPUListen
 	public void stateChanged(CPU cpu, State oldState, State newState) {
 	}
 
+	@Override
+	public void memoryRead(CPU cpu, int addr, short value) {
+	}
 	
 }

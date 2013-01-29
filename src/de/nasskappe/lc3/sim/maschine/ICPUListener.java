@@ -10,5 +10,7 @@ public interface ICPUListener {
 
 	void memoryChanged(CPU cpu, int addr, short value);
 	
+	void memoryRead(CPU cpu, int addr, short value);
+	
 	void stateChanged(CPU cpu, CPU.State oldState, CPU.State newState);
 }

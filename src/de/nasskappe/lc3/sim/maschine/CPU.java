@@ -196,17 +196,30 @@ public class CPU {
 	}
 
 	public short readMemory(int addr) {
-		return mem.getValue(addr);
+		short value = mem.getValue(addr);
+		fireMemoryRead(addr, value);
+		return value;
 	}
 	
 	public void writeMemory(int addr, short value) {
 		mem.setValue(addr, value);
-		fireMemoryChanged(this, addr, value);
+		
+		// clock bit
+		if (addr == 0xFFFE && (value & 0x8000) == 0) {
+			setState(State.STOPPED);
+		}
+		fireMemoryChanged(addr, value);
 	}
 
-	private void fireMemoryChanged(CPU cpu, int addr, short value) {
+	private void fireMemoryChanged(int addr, short value) {
 		for (ICPUListener l : listeners) {
 			l.memoryChanged(this, addr, value);
+		}
+	}
+	
+	private void fireMemoryRead(int addr, short value) {
+		for (ICPUListener l : listeners) {
+			l.memoryRead(this, addr, value);
 		}
 	}
 	
@@ -238,7 +251,7 @@ public class CPU {
 			addressBreakpoints.remove(address);
 		}
 		
-		fireMemoryChanged(this, address, readMemory(address));
+		fireMemoryChanged(address, readMemory(address));
 	}
 	
 	public void updatePSR() {

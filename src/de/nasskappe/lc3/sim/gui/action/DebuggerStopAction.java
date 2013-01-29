@@ -59,4 +59,8 @@ public class DebuggerStopAction extends AbstractAction implements ICPUListener {
 		});
 	}
 
+	@Override
+	public void memoryRead(CPU cpu, int addr, short value) {
+	}
+
 }
