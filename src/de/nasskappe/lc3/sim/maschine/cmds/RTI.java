@@ -26,6 +26,11 @@ public class RTI extends AbstractCommand {
 			
 			lc3.setRegister(Register.PC, oldPC);
 			lc3.setRegister(Register.PSR, oldPSR);
+			
+			if (!lc3.getUtils().isSupervisor()) {
+				short usp = lc3.getRegister(Register.USP);
+				lc3.setRegister(Register.R6, usp);
+			}
 		}
 	}
 
