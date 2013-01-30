@@ -29,7 +29,7 @@ public class STR extends AbstractCommand {
 	public void execute(LC3 lc3) {
 		int addr = lc3.getRegister(baseR) + offset;
 		short value = lc3.getRegister(sr);
-		lc3.writeMemory(addr, value);
+		lc3.getMemory().setValue(addr, value);
 	}
 
 	public Register getSr() {

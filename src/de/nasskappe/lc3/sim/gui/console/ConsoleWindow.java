@@ -7,30 +7,34 @@ import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.BadLocationException;
 
-import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.LC3;
-import de.nasskappe.lc3.sim.maschine.LC3.State;
-import de.nasskappe.lc3.sim.maschine.Memory;
-import de.nasskappe.lc3.sim.maschine.Register;
-import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
+import de.nasskappe.lc3.sim.maschine.mem.IMemoryListener;
+import de.nasskappe.lc3.sim.maschine.mem.Memory;
 
-public class ConsoleWindow extends JDialog implements ILC3Listener {
+public class ConsoleWindow extends JDialog implements IMemoryListener {
 
+	public final static int BITMASK_DISPLAY_READY = (1 << 15);
+	public final static int BITMASK_KEYBOARD_READY = (1 << 15);
+	public final static int BITMASK_KEYBOARD_INTERRUPT_ENABLED = (1 << 14);
+	
 	private JTextArea textArea;
-	private LC3 lc3;
 	private volatile boolean displayBusy;
+	private volatile boolean keyboardCharacterIsWaiting;
+	private Memory mem;
+	private LC3 lc3;
 
-	public ConsoleWindow(LC3 lc3, Window parent) {
+	public ConsoleWindow(Window parent, LC3 lc3) {
 		super(parent);
+		
 		this.lc3 = lc3;
+		this.mem = lc3.getMemory();
+		
 		setModal(false);
 		
 		setTitle("Console");
@@ -54,34 +58,46 @@ public class ConsoleWindow extends JDialog implements ILC3Listener {
 		setPreferredSize(new Dimension(400, 400));
 		pack();
 		
-		lc3.addListener(this);
-		setDisplayReady(lc3);
+		mem.addListener(this);
+		setDisplayReady();
+		unsetCharacterIsWaiting();
 	}
 
 	protected void handleKeypress(KeyEvent e) {
-		if (lc3 != null) {
-			int kbsr = lc3.readMemory(Memory.ADDR_KBSR);
-			if ((kbsr & (1 << 15)) == 0) {
-				lc3.writeMemory(Memory.ADDR_KBDR, (short) (e.getKeyChar() & 0xFF));
-				setKeyboardReady();
+		if (mem != null) {
+			if (!isCharacterWaiting()) { // previous character was read
+				// put value into memory
+				mem.setValue(Memory.ADDR_KBDR, (short) e.getKeyChar());
+				setCharacterIsWaiting();
+				if (isKeyboardInterruptEnabled()) {
+					lc3.getInterruptController().interruptKeyboard();
+				}
 			}
 		}
 	}
 	
-	public static void main(String[] args) {
-		ConsoleWindow d = new ConsoleWindow(null, null);
-		d.setModal(false);
-		d.pack();
-		d.setLocationRelativeTo(null);
-		d.setVisible(true);
-		
-		d.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosed(WindowEvent e) {
-				System.exit(0);
-			}
-		});
-		d.outputCharacter('h');
+	private boolean isKeyboardInterruptEnabled() {
+		short value = mem.getValue(Memory.ADDR_KBSR);
+		boolean isEnabled = (value & BITMASK_KEYBOARD_INTERRUPT_ENABLED) != 0;
+		return isEnabled;
+	}
+
+	private boolean isCharacterWaiting() {
+		return keyboardCharacterIsWaiting;
+	}
+	
+	private void unsetCharacterIsWaiting() {
+		keyboardCharacterIsWaiting = false;
+		short value = mem.getValue(Memory.ADDR_KBSR);
+		value = (short) (value & ~BITMASK_KEYBOARD_READY);
+		mem.setValue(Memory.ADDR_KBSR, value);
+	}
+	
+	private void setCharacterIsWaiting() {
+		keyboardCharacterIsWaiting = true;
+		short value = mem.getValue(Memory.ADDR_KBSR);
+		value = (short) (value | BITMASK_KEYBOARD_READY);
+		mem.setValue(Memory.ADDR_KBSR, value);
 	}
 
 	public void outputCharacter(char c) {
@@ -97,74 +113,59 @@ public class ConsoleWindow extends JDialog implements ILC3Listener {
 	}
 	
 	@Override
-	public void registerChanged(LC3 lc3, Register r, short oldValue, short value) {
-	}
-
-	@Override
-	public void instructionExecuted(LC3 lc3, ICommand cmd) {
-	}
-	
-	@Override
-	public void memoryChanged(final LC3 lc3, int addr, final short value) {
+	public void memoryChanged(final Memory mem, int addr, short oldValue, final short newValue) {
 		// output character to display
 		if (addr == Memory.ADDR_DDR) {
-			if (isDisplayReady() && value != 0) {
-				setDisplayBusy(lc3);
+			if (isDisplayReady() && newValue != 0) {
+				setDisplayBusy();
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
 						// output character
-						outputCharacter((char) (value & 0xFF));
+						outputCharacter((char) (newValue & 0xFF));
 
-						setDisplayReady(lc3);
+						// next character please...
+						setDisplayReady();
 					}
 				});
 			}
 		} else if (addr == Memory.ADDR_DSR) {
-			boolean mBusy = (value & 0x8000) == 0;
+			boolean mBusy = (newValue & BITMASK_DISPLAY_READY) == 0;
 			if (mBusy != displayBusy) {
 				if (displayBusy) {
-					setDisplayBusy(lc3);
+					setDisplayBusy();
 				} else {
-					setDisplayReady(lc3);
+					setDisplayReady();
 				}
 			}
 		}
-	}
-
-	@Override
-	public void stateChanged(LC3 lc3, State oldState, State newState) {
 	}
 
 	private boolean isDisplayReady() {
 		return !displayBusy;
 	}
 	
-	private void setDisplayReady(LC3 lc3) {
+	private void setDisplayReady() {
 		// display ready
 		displayBusy = false;
-		lc3.writeMemory(Memory.ADDR_DSR, (short) 0x8000);
+		short value = mem.getValue(Memory.ADDR_DSR);
+		value = (short) (value | BITMASK_DISPLAY_READY);
+		mem.setValue(Memory.ADDR_DSR, value);
 	}
 	
-	private void setDisplayBusy(LC3 lc3) {
+	private void setDisplayBusy() {
 		// display busy
 		displayBusy = true;
-		lc3.writeMemory(Memory.ADDR_DSR, (short) 0);
+		short value = mem.getValue(Memory.ADDR_DSR);
+		value = (short) (value & ~BITMASK_DISPLAY_READY);
+		mem.setValue(Memory.ADDR_DSR, value);
 	}
 
 	@Override
-	public void memoryRead(LC3 lc3, int addr, short value) {
+	public void memoryRead(Memory memory, int addr, short value) {
 		if (addr == Memory.ADDR_KBDR) {
-			setKeyboardBusy();
+			unsetCharacterIsWaiting();
 		}
-	}
-
-	private void setKeyboardBusy() {
-		lc3.writeMemory(Memory.ADDR_KBSR, (short) 0x0000);
-	}
-
-	private void setKeyboardReady() {
-		lc3.writeMemory(Memory.ADDR_KBSR, (short) 0x8000);
 	}
 
 	

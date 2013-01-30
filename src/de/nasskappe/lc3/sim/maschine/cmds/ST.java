@@ -25,7 +25,7 @@ public class ST extends AbstractCommand {
 	public void execute(LC3 lc3) {
 		int addr = lc3.getPC() + pcOffset;
 		short value = lc3.getRegister(sr);
-		lc3.writeMemory(addr, value);
+		lc3.getMemory().setValue(addr, value);
 	}
 
 	public Register getSr() {

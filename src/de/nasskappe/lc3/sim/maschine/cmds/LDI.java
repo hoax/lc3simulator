@@ -23,8 +23,8 @@ public class LDI extends AbstractCommand {
 	@Override
 	public void execute(LC3 lc3) {
 		int addr = lc3.getPC() + pcOffset;
-		int addr2 = ((int)lc3.readMemory(addr)) & 0xFFFF;
-		short value = lc3.readMemory(addr2);
+		int addr2 = ((int)lc3.getMemory().getValue(addr)) & 0xFFFF;
+		short value = lc3.getMemory().getValue(addr2);
 		lc3.setRegister(dr, value);
 		lc3.updateCC(value);
 	}

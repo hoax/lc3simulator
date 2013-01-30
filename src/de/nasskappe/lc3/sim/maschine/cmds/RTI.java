@@ -1,6 +1,7 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
 import de.nasskappe.lc3.sim.maschine.LC3;
+import de.nasskappe.lc3.sim.maschine.Register;
 
 public class RTI extends AbstractCommand {
 
@@ -15,7 +16,17 @@ public class RTI extends AbstractCommand {
 	
 	@Override
 	public void execute(LC3 lc3) {
-		// TODO
+		if (!lc3.getUtils().isSupervisor()) {
+			// TODO exception!
+		} else {
+			short ssp = lc3.getRegister(Register.SSP);
+			short oldPSR = lc3.getMemory().getValue(ssp++);
+			short oldPC = lc3.getMemory().getValue(ssp++);
+			lc3.setRegister(Register.R6, ssp);
+			
+			lc3.setRegister(Register.PC, oldPC);
+			lc3.setRegister(Register.PSR, oldPSR);
+		}
 	}
 
 	@Override

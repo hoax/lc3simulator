@@ -5,15 +5,17 @@ import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
 
+import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.LC3.State;
-import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.BR;
 import de.nasskappe.lc3.sim.maschine.cmds.CommandFactory;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
+import de.nasskappe.lc3.sim.maschine.mem.IMemoryListener;
+import de.nasskappe.lc3.sim.maschine.mem.Memory;
 
-public class CodeTableModel extends AbstractTableModel implements ILC3Listener {
+public class CodeTableModel extends AbstractTableModel implements ILC3Listener, IMemoryListener {
 
 	private final static String[] COLUMNS = {
 		"", "address", "binary", "hex", "ASM"
@@ -102,22 +104,29 @@ public class CodeTableModel extends AbstractTableModel implements ILC3Listener {
 	}
 
 	@Override
-	public void memoryChanged(LC3 lc3, int addr, short value) {
-		if (value == 0) {
+	public void stateChanged(LC3 lc3, State oldState, State newState) {
+	}
+
+	@Override
+	public void memoryChanged(Memory memory, int addr, short oldValue,
+			short newValue) {
+		if (newValue == 0) {
 			row2cmd.remove((Integer) addr);
 		} else {
-			ICommand cmd = factory.createCommand(value, addr);
+			ICommand cmd = factory.createCommand(newValue, addr);
 			row2cmd.put(addr, cmd);
 		}
 		fireTableRowsUpdated(addr, addr);
 	}
 
 	@Override
-	public void stateChanged(LC3 lc3, State oldState, State newState) {
+	public void memoryRead(Memory memory, int addr, short value) {
 	}
 
 	@Override
-	public void memoryRead(LC3 lc3, int addr, short value) {
+	public void breakpointChanged(LC3 lc3, int address, boolean set) {
+		// triggers redraw -> show/hide breakpoint icon
+		fireTableRowsUpdated(address, address); 
 	}
 	
 }

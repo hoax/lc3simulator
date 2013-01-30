@@ -53,13 +53,15 @@ import de.nasskappe.lc3.sim.gui.renderer.Binary16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.BreakpointTableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.Hex16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.LabelTableCellRenderer;
+import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.LC3.State;
-import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
+import de.nasskappe.lc3.sim.maschine.mem.IMemoryListener;
+import de.nasskappe.lc3.sim.maschine.mem.Memory;
 
-public class MainWindow extends JFrame implements ILC3Listener {
+public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener {
 
 	private JPanel contentPane;
 	private JTable registerTable;
@@ -78,7 +80,6 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	private JButton btnGo;
 	private JComboBox<String> currentAddressBox;
 	private HexNumberComboBoxModel addressModel;
-	private Lc3Utils lc3Utils;
 	private ConsoleWindow console;
 	
 	private Runnable scrollToPcRunnable = new Runnable() {
@@ -122,7 +123,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		
 		lc3 = new LC3();
 		lc3.addListener(this);
-		lc3Utils = new Lc3Utils(lc3);
+		lc3.getMemory().addListener(this);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 484);
@@ -139,11 +140,11 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		showConsoleAction = new ShowConsoleAction(console);
 		loadFileAction = new LoadFileAction(this, lc3);
 		resetAction = new ResetAction(lc3);
-		runAction = new DebuggerRunAction(lc3Utils, scrollToPcRunnable);
-		stopAction = new DebuggerStopAction(lc3Utils);
-		stepIntoAction = new DebuggerStepIntoAction(lc3Utils, scrollToPcRunnable);
-		stepOverAction = new DebuggerStepOverAction(lc3Utils, scrollToPcRunnable);
-		stepReturnAction = new DebuggerStepReturnAction(lc3Utils, scrollToPcRunnable);
+		runAction = new DebuggerRunAction(lc3.getUtils(), scrollToPcRunnable);
+		stopAction = new DebuggerStopAction(lc3.getUtils());
+		stepIntoAction = new DebuggerStepIntoAction(lc3.getUtils(), scrollToPcRunnable);
+		stepOverAction = new DebuggerStepOverAction(lc3.getUtils(), scrollToPcRunnable);
+		stepReturnAction = new DebuggerStepReturnAction(lc3.getUtils(), scrollToPcRunnable);
 		
 		lc3.addListener(loadFileAction);
 		lc3.addListener(runAction);
@@ -166,7 +167,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	}
 	
 	private ConsoleWindow createConsole() {
-		ConsoleWindow console = new ConsoleWindow(lc3, this);
+		ConsoleWindow console = new ConsoleWindow(this, lc3);
 		console.setAlwaysOnTop(true);
 				
 		return console;
@@ -303,7 +304,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 			Integer value = NumberUtils.stringToInt(currentValueField.getText());
 			int row = codeTable.getSelectedRow();
 			if (row >= 0) {
-				lc3.writeMemory(row, value.shortValue());
+				lc3.getMemory().setValue(row, value.shortValue());
 			}
 		} catch (Exception e) {
 			JOptionPane.showMessageDialog(this, e.getMessage());
@@ -442,6 +443,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		table.setFillsViewportHeight(true);
 		CodeTableModel codeModel = new CodeTableModel(lc3);
 		lc3.addListener(codeModel);
+		lc3.getMemory().addListener(codeModel);
 		table.setModel(codeModel);
 		
 		table.getColumnModel().getColumn(0).setCellRenderer(new BreakpointTableCellRenderer(lc3, table));
@@ -510,7 +512,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	private void updateCurrentValueField() {
 		int row = codeTable.getSelectedRow();
 		if (row != -1) {
-			int value = ((int)lc3.readMemory(row)) & 0xffff;
+			int value = ((int)lc3.getMemory().getValue(row)) & 0xffff;
 			
 			currentValueField.setNumber(value);
 		}
@@ -576,7 +578,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	}
 
 	@Override
-	public void memoryChanged(final LC3 lc3, final int addr, final short value) {
+	public void memoryChanged(Memory mem, int addr, short oldValue, short newValue) {
 		if (addr == codeTable.getSelectedRow()) {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
@@ -592,7 +594,11 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	}
 
 	@Override
-	public void memoryRead(LC3 lc3, int addr, short value) {
+	public void memoryRead(Memory mem, int addr, short value) {
+	}
+
+	@Override
+	public void breakpointChanged(LC3 lc3, int address, boolean set) {
 	}
 
 }

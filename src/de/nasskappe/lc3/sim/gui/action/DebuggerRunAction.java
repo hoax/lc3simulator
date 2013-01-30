@@ -9,9 +9,9 @@ import javax.swing.ImageIcon;
 
 import de.nasskappe.lc3.sim.gui.Lc3Utils;
 import de.nasskappe.lc3.sim.gui.MainWindow;
+import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.LC3.State;
-import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
@@ -48,10 +48,6 @@ public class DebuggerRunAction extends AbstractAction implements ILC3Listener {
 	}
 
 	@Override
-	public void memoryChanged(LC3 lc3, int addr, short value) {
-	}
-
-	@Override
 	public void stateChanged(LC3 lc3, State oldState, final State newState) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -62,7 +58,7 @@ public class DebuggerRunAction extends AbstractAction implements ILC3Listener {
 	}
 
 	@Override
-	public void memoryRead(LC3 lc3, int addr, short value) {
+	public void breakpointChanged(LC3 lc3, int address, boolean set) {
 	}
 
 }

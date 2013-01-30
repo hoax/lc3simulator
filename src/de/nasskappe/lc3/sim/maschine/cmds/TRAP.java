@@ -23,7 +23,7 @@ public class TRAP extends AbstractCommand {
 		int currentPC = lc3.getPC();
 		lc3.setRegister(Register.R7, (short) currentPC);
 		
-		int addr = lc3.readMemory(trap) & 0xFFFF;
+		int addr = lc3.getMemory().getValue(trap) & 0xFFFF;
 		lc3.setPC(addr);
 	}
 

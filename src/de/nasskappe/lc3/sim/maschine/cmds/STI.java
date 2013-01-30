@@ -23,9 +23,9 @@ public class STI extends AbstractCommand {
 	@Override
 	public void execute(LC3 lc3) {
 		int addr = lc3.getPC() + pcOffset;
-		int addr2 = lc3.readMemory(addr) & 0xFFFF;
+		int addr2 = lc3.getMemory().getValue(addr) & 0xFFFF;
 		short value = lc3.getRegister(sr);
-		lc3.writeMemory(addr2, value);
+		lc3.getMemory().setValue(addr2, value);
 	}
 
 	public Register getSr() {

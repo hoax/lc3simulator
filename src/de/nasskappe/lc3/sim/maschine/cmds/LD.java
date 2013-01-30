@@ -24,7 +24,7 @@ public class LD extends AbstractCommand {
 	@Override
 	public void execute(LC3 lc3) {
 		int addr = lc3.getPC() + pcOffset;
-		short value = lc3.readMemory(addr);
+		short value = lc3.getMemory().getValue(addr);
 		lc3.setRegister(dr, value);
 		lc3.updateCC(value);
 	}

@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import de.nasskappe.lc3.sim.gui.Lc3Utils;
+import de.nasskappe.lc3.sim.maschine.InterruptController.InterruptRequest;
 import de.nasskappe.lc3.sim.maschine.Register.CC_Value;
 import de.nasskappe.lc3.sim.maschine.cmds.CommandFactory;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
@@ -15,37 +17,51 @@ import de.nasskappe.lc3.sim.maschine.cmds.JSR;
 import de.nasskappe.lc3.sim.maschine.cmds.RET;
 import de.nasskappe.lc3.sim.maschine.cmds.RTI;
 import de.nasskappe.lc3.sim.maschine.cmds.TRAP;
+import de.nasskappe.lc3.sim.maschine.mem.IMemoryListener;
+import de.nasskappe.lc3.sim.maschine.mem.Memory;
 
 public class LC3 {
 	public enum State {
 		RUNNING, STOPPED
 	}
-	
-	private final static int BIT_P = 0;
-	private final static int BIT_Z = 1;
-	private final static int BIT_N = 2;
-	private final static int BITS_PRIORITY = 8;
-	private final static int BIT_PRIVILEGE = 15;
-	
+
+	private InterruptController ic;
 	private Memory mem;
 	private Map<Register, Short> register;
-	private int currentPriority;
 	private volatile State state;
 	
 	private CommandFactory cmdFactory;
 	private Set<ILC3Listener> listeners;
 	private Set<Integer> addressBreakpoints;
-	
+	private Lc3Utils utils = new Lc3Utils(this);
+
+	private IMemoryListener memoryListener = new IMemoryListener() {
+		@Override
+		public void memoryRead(Memory memory, int addr, short value) {
+		}
+		
+		@Override
+		public void memoryChanged(Memory memory, int addr, short oldValue,
+				short newValue) {
+			// check clock bit (unset by TRAP 0x25 [HALT])
+			if (addr == Memory.ADDR_MCR && !utils.isClockEnabled()) {
+				setState(State.STOPPED);
+			}
+		}
+	};
 	
 	public LC3() {
 		state = State.STOPPED;
-		currentPriority = 0;
 		listeners = new HashSet<ILC3Listener>();
 		cmdFactory = new CommandFactory();
+		
+		ic = new InterruptController();
 		mem = new Memory();
+		mem.addListener(memoryListener);
+		
 		register = new HashMap<Register, Short>();
-		addressBreakpoints = new HashSet<>();
-	
+		addressBreakpoints = new HashSet<Integer>();
+			
 		reset();
 	}
 	
@@ -53,13 +69,13 @@ public class LC3 {
 		for(int b = input.read(); b != -1; b = input.read()) {
 			b <<= 8;
 			b |= input.read();
-			writeMemory(startAddress++, (short) b);
+			mem.setValue(startAddress++, (short) b);
 		}
 	}
 	
 	public ICommand step() {
 		Integer addr = getPC();
-		short code = readMemory(addr);
+		short code = mem.getValue(addr);
 		setRegister(Register.IR, code);
 		ICommand cmd = cmdFactory.createCommand((short)code, addr);
 		setRegister(Register.PC, (short) (addr + 1));
@@ -68,9 +84,33 @@ public class LC3 {
 		
 		fireInstructionExecuted(this, cmd);
 		
+		handleInterrupt();
+		
 		return cmd;
 	}
 	
+	private void handleInterrupt() {
+		if (ic.isNextInterruptHigherThan(utils.getPriority())) {
+			// save PC and PSR
+			short oldPSR = getRegister(Register.PSR);
+			short oldPC = getRegister(Register.PC);
+			short ssp = getRegister(Register.SSP);
+			
+			getMemory().setValue(--ssp, oldPC);
+			getMemory().setValue(--ssp, oldPSR);
+			
+			utils.setSupervisor(true);
+			
+			setRegister(Register.R6, ssp);
+			
+			// switch to interrupt handling
+			InterruptRequest ir = ic.getNextInterrupt();
+			short newPC = getMemory().getValue(0x100 + ir.getInterrupt().getVector());
+			utils.setPriority(ir.getPriority());
+			setRegister(Register.PC, newPC);
+		}
+	}
+
 	public ICommand stepOver() {
 		setState(State.RUNNING);
 		
@@ -118,10 +158,11 @@ public class LC3 {
 			State oldState = state;
 			state = newState;
 			
+			// update MCR
 			if (state == State.RUNNING) {
-				writeMemory(Memory.ADDR_MCR, (short) 0x8000);
+				mem.setValue(Memory.ADDR_MCR, (short) 0x8000);
 			} else {
-				writeMemory(Memory.ADDR_MCR, (short) 0x0);
+				mem.setValue(Memory.ADDR_MCR, (short) 0x0);
 			}
 			
 			fireStateChanged(oldState, newState);
@@ -166,13 +207,24 @@ public class LC3 {
 	public void setRegister(Register register, Short value) {
 		Short oldValue = this.register.get(register);
 		this.register.put(register, value);
+		if (register == Register.R6) {
+			if (utils.isSupervisor()) {
+				this.register.put(Register.SSP, value);
+			} else {
+				this.register.put(Register.USP, value);
+			}
+		}
 		if (oldValue == null)
 			oldValue = 0;
 		fireRegisterChanged(register, oldValue, value);
 	}
 	
 	public Short getRegister(Register register) {
-		return this.register.get(register);
+		Short value = this.register.get(register);
+		if (value == null) {
+			value = 0;
+		}
+		return value;
 	}
 
 	public void updateCC(short value) {
@@ -183,41 +235,12 @@ public class LC3 {
 			ccValue = Register.CC_Value.N;
 		
 		setRegister(Register.CC, (short) ccValue.ordinal());
-		updatePSR();
+		utils.setCC(ccValue.getBits());
 	}
 	
 	public CC_Value getCC() {
 		short val = register.get(Register.CC);
 		return CC_Value.values()[val];
-	}
-
-	public short readMemory(int addr) {
-		short value = mem.getValue(addr);
-		fireMemoryRead(addr, value);
-		return value;
-	}
-	
-	public void writeMemory(int addr, short value) {
-		mem.setValue(addr, value);
-		
-		// check clock bit (disabled by TRAP 0x25 [HALT])
-		if (addr == Memory.ADDR_MCR && (value & 0x8000) == 0) {
-			setState(State.STOPPED);
-		}
-		
-		fireMemoryChanged(addr, value);
-	}
-
-	private void fireMemoryChanged(int addr, short value) {
-		for (ILC3Listener l : listeners) {
-			l.memoryChanged(this, addr, value);
-		}
-	}
-	
-	private void fireMemoryRead(int addr, short value) {
-		for (ILC3Listener l : listeners) {
-			l.memoryRead(this, addr, value);
-		}
 	}
 	
 	private void fireStateChanged(State oldState, State newState) {
@@ -248,28 +271,20 @@ public class LC3 {
 			addressBreakpoints.remove(address);
 		}
 		
-		fireMemoryChanged(address, readMemory(address));
+		fireBreakpointChanged(address, aValue);
 	}
 	
-	public void updatePSR() {
-		short psr = 0 << BIT_PRIVILEGE; // usermode
-		psr |= currentPriority << BITS_PRIORITY;
-		psr |= (bool2bit(getCC() == CC_Value.N)) << BIT_N;
-		psr |= (bool2bit(getCC() == CC_Value.P)) << BIT_P;
-		psr |= (bool2bit(getCC() == CC_Value.Z)) << BIT_Z;
-		
-		setRegister(Register.PSR, psr);
+	private void fireBreakpointChanged(int address, boolean set) {
+		for(ILC3Listener l : listeners) {
+			l.breakpointChanged(this, address, set);
+		}
 	}
 	
-	private int bool2bit(boolean v) {
-		return (v) ? 1 : 0;
-	}
-
 	public void reset() {
 		setState(State.STOPPED);
 		
-		for(int i = 0; i< 0x10000; i++) {
-			writeMemory(i, (short) 0);
+		for(int addr = 0; addr < 0x10000; addr++) {
+			mem.setValue(addr, (short) 0);
 		}
 		
 		InputStream osStream = getClass().getResourceAsStream("lc3os.obj");
@@ -290,18 +305,31 @@ public class LC3 {
 			}
 		}
 		
-		register.put(Register.R0, (short) 0);
-		register.put(Register.R1, (short) 0);
-		register.put(Register.R2, (short) 0);
-		register.put(Register.R3, (short) 0);
-		register.put(Register.R4, (short) 0);
-		register.put(Register.R5, (short) 0);
-		register.put(Register.R6, (short) 0);
-		register.put(Register.R7, (short) 0);
-		register.put(Register.PSR, (short) 0);
-		register.put(Register.IR, (short) 0);
-		register.put(Register.PC, (short) 0x3000);
+		setRegister(Register.USP, (short) 0);
+		setRegister(Register.SSP, (short) 0x3000);
+		setRegister(Register.R0, (short) 0);
+		setRegister(Register.R1, (short) 0);
+		setRegister(Register.R2, (short) 0);
+		setRegister(Register.R3, (short) 0);
+		setRegister(Register.R4, (short) 0);
+		setRegister(Register.R5, (short) 0);
+		setRegister(Register.R6, (short) 0);
+		setRegister(Register.R7, (short) 0);
+		setRegister(Register.PSR, (short) 0x8000);
+		setRegister(Register.IR, (short) 0);
+		setRegister(Register.PC, (short) 0x3000);
 		updateCC((short) 0);
 	}
 
+	public Memory getMemory() {
+		return mem;
+	}
+
+	public InterruptController getInterruptController() {
+		return ic;
+	}
+
+	public Lc3Utils getUtils() {
+		return utils;
+	}
 }

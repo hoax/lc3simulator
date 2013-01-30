@@ -2,9 +2,9 @@ package de.nasskappe.lc3.sim.gui;
 
 import javax.swing.table.AbstractTableModel;
 
+import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.LC3.State;
-import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
@@ -139,10 +139,6 @@ public class RegisterTableModel extends AbstractTableModel implements ILC3Listen
 	}
 
 	@Override
-	public void memoryChanged(LC3 lc3, int addr, short value) {
-	}
-	
-	@Override
 	public Class<?> getColumnClass(int columnIndex) {
 		if (columnIndex % 2 == 1)
 			return Integer.class;
@@ -155,7 +151,7 @@ public class RegisterTableModel extends AbstractTableModel implements ILC3Listen
 	}
 
 	@Override
-	public void memoryRead(LC3 lc3, int addr, short value) {
+	public void breakpointChanged(LC3 lc3, int address, boolean set) {
 	}
 	
 }

@@ -48,10 +48,6 @@ public class DebuggerStepIntoAction extends AbstractAction implements ILC3Listen
 	}
 
 	@Override
-	public void memoryChanged(LC3 lc3, int addr, short value) {
-	}
-
-	@Override
 	public void stateChanged(LC3 lc3, State oldState, final State newState) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -62,7 +58,6 @@ public class DebuggerStepIntoAction extends AbstractAction implements ILC3Listen
 	}
 
 	@Override
-	public void memoryRead(LC3 lc3, int addr, short value) {
+	public void breakpointChanged(LC3 lc3, int address, boolean set) {
 	}
-
 }
