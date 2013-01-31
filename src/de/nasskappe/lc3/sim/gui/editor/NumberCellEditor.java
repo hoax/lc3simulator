@@ -7,13 +7,18 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JTable;
 
 import de.nasskappe.lc3.sim.gui.JNumberField;
+import de.nasskappe.lc3.sim.gui.formatter.IValueFormatter;
 
 public class NumberCellEditor extends DefaultCellEditor {
 
 	private JNumberField numberField;
 
 	public NumberCellEditor() {
-		super(new JNumberField());
+		this(false, null);
+	}
+	
+	public NumberCellEditor(boolean disablePopup, IValueFormatter formatter) {
+		super(new JNumberField(disablePopup, formatter));
 
 		numberField = (JNumberField) editorComponent;
 		numberField.setFont(new Font("Courier New", Font.PLAIN, numberField.getFont().getSize()));

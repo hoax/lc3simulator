@@ -24,11 +24,21 @@ public class JNumberField extends JTextField {
 
 	public JNumberField() {
 		super();
-		init();
+		init(false, null);
 	}
+	
+	public JNumberField(boolean disablePopup, IValueFormatter formatter) {
+		super();
+		init(disablePopup, formatter);
+	}
+	
 
-	private void init() {
-		createPopup();
+	private void init(boolean disablePopup, IValueFormatter formatter) {
+		if (!disablePopup) {
+			createPopup();
+		} else {
+			this.formatter = formatter;
+		}
 	}
 	
 	private void createPopup() {

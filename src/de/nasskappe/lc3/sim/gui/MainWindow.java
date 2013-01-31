@@ -2,23 +2,15 @@ package de.nasskappe.lc3.sim.gui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
 
-import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -26,16 +18,16 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableCellRenderer;
 
 import de.nasskappe.lc3.sim.gui.action.DebuggerRunAction;
@@ -48,9 +40,6 @@ import de.nasskappe.lc3.sim.gui.action.ResetAction;
 import de.nasskappe.lc3.sim.gui.action.ShowConsoleAction;
 import de.nasskappe.lc3.sim.gui.console.ConsoleWindow;
 import de.nasskappe.lc3.sim.gui.editor.NumberCellEditor;
-import de.nasskappe.lc3.sim.gui.renderer.ASMTableCellRenderer;
-import de.nasskappe.lc3.sim.gui.renderer.Binary16TableCellRenderer;
-import de.nasskappe.lc3.sim.gui.renderer.BreakpointTableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.Hex16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.LabelTableCellRenderer;
 import de.nasskappe.lc3.sim.maschine.ILC3Listener;
@@ -58,15 +47,13 @@ import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.LC3.State;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
-import de.nasskappe.lc3.sim.maschine.mem.IMemoryListener;
-import de.nasskappe.lc3.sim.maschine.mem.Memory;
 
-public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener {
+public class MainWindow extends JFrame implements ILC3Listener {
 
 	private JPanel contentPane;
 	private JTable registerTable;
 	private LC3 lc3;
-	private JTable codeTable;
+	private CodePanel codeTable;
 	private LoadFileAction loadFileAction;
 	private DebuggerRunAction runAction;
 	private DebuggerStopAction stopAction;
@@ -76,7 +63,6 @@ public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener 
 	private ShowConsoleAction showConsoleAction;
 	private ResetAction resetAction;
 	
-	private JNumberField currentValueField;
 	private JButton btnGo;
 	private JComboBox<String> currentAddressBox;
 	private HexNumberComboBoxModel addressModel;
@@ -98,23 +84,8 @@ public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener 
 			}
 		}
 	};
+	private AddressValueDisplay numberDisplay;
 	
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					MainWindow frame = new MainWindow();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
 	/**
 	 * Create the frame.
 	 */
@@ -123,7 +94,6 @@ public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener 
 		
 		lc3 = new LC3();
 		lc3.addListener(this);
-		lc3.getMemory().addListener(this);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 484);
@@ -160,8 +130,7 @@ public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener 
 
 		scrollToPC();
 
-		codeTable.getSelectionModel().setSelectionInterval(0x3000, 0x3000);
-		codeTable.requestFocus();
+		codeTable.setSelectedRow(0x3000);
 		
 		lc3.reset();
 	}
@@ -178,13 +147,41 @@ public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener 
 		contentPane.add(panel, BorderLayout.CENTER);
 		panel.setLayout(new BorderLayout(0, 0));
 		
-		JScrollPane scrollPane = new JScrollPane();
-		panel.add(scrollPane);
+		numberDisplay = new AddressValueDisplay();
+		panel.add(numberDisplay, BorderLayout.NORTH);
 		
 		codeTable = createCodeTable();
-		scrollPane.setViewportView(codeTable);
+		panel.add(codeTable, BorderLayout.CENTER);
+		
+		codeTable.getTable().getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (!e.getValueIsAdjusting()) {
+					updateNumberDisplay();
+				}
+			}
+		});
+		
+		codeTable.getTableModel().addTableModelListener(new TableModelListener() {
+			@Override
+			public void tableChanged(TableModelEvent e) {
+				int row = codeTable.getTable().getSelectedRow();
+				
+				if (e.getFirstRow() >= row && e.getLastRow() <= row) {
+					updateNumberDisplay();
+				}
+			}
+		});
 		
 		return panel;
+	}
+	
+	private void updateNumberDisplay() {
+		int row = codeTable.getTable().getSelectedRow();
+		if (row != -1) {
+			Number n = (Number) codeTable.getTableModel().getValueAt(row, 2);
+			numberDisplay.setNumber(row, n.shortValue());
+		}
 	}
 
 	private JPanel createTopPanel() {
@@ -252,13 +249,17 @@ public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener 
 		gbc_currentAddressBox.gridy = 0;
 		panel.add(currentAddressBox, gbc_currentAddressBox);
 		
-		btnGo = new JButton("go");
-		btnGo.addActionListener(new ActionListener() {
+		ActionListener goToAddressAction = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addressModel.addAddress(currentAddressBox.getSelectedItem());
 				goToAddress(currentAddressBox.getSelectedItem().toString());
 			}
-		});
+		};
+
+		currentAddressBox.addActionListener(goToAddressAction);
+		
+		btnGo = new JButton("go");
+		btnGo.addActionListener(goToAddressAction);
 		GridBagConstraints gbc_btnGo = new GridBagConstraints();
 		gbc_btnGo.anchor = GridBagConstraints.WEST;
 		gbc_btnGo.insets = new Insets(0, 0, 5, 0);
@@ -266,49 +267,7 @@ public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener 
 		gbc_btnGo.gridy = 0;
 		panel.add(btnGo, gbc_btnGo);
 		
-		JLabel lblValue = new JLabel("value:");
-		GridBagConstraints gbc_lblValue = new GridBagConstraints();
-		gbc_lblValue.anchor = GridBagConstraints.EAST;
-		gbc_lblValue.insets = new Insets(0, 0, 0, 5);
-		gbc_lblValue.gridx = 0;
-		gbc_lblValue.gridy = 1;
-		panel.add(lblValue, gbc_lblValue);
-		
-		currentValueField = new JNumberField();
-		currentValueField.setFont(new Font("Courier New", Font.PLAIN, currentValueField.getFont().getSize()));
-		GridBagConstraints gbc_currentValueField = new GridBagConstraints();
-		gbc_currentValueField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_currentValueField.insets = new Insets(0, 0, 0, 5);
-		gbc_currentValueField.gridx = 1;
-		gbc_currentValueField.gridy = 1;
-		panel.add(currentValueField, gbc_currentValueField);
-		currentValueField.setColumns(10);
-		
-		JButton btnSetValue = new JButton("set value");
-		btnSetValue.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				setCurrentValue();
-			}
-		});
-		GridBagConstraints gbc_btnSetValue = new GridBagConstraints();
-		gbc_btnSetValue.anchor = GridBagConstraints.WEST;
-		gbc_btnSetValue.gridx = 2;
-		gbc_btnSetValue.gridy = 1;
-		panel.add(btnSetValue, gbc_btnSetValue);
-		
 		return panel;
-	}
-
-	protected void setCurrentValue() {
-		try {
-			Integer value = NumberUtils.stringToInt(currentValueField.getText());
-			int row = codeTable.getSelectedRow();
-			if (row >= 0) {
-				lc3.getMemory().setValue(row, value.shortValue());
-			}
-		} catch (Exception e) {
-			JOptionPane.showMessageDialog(this, e.getMessage());
-		}
 	}
 
 	protected void goToAddress(String addressString) {
@@ -320,8 +279,9 @@ public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener 
 			addressString = String.format("%04x", address);
 			addressModel.addAddress(address);
 			
-			codeTable.getSelectionModel().setSelectionInterval(address, address);
-			scrollTo(address);
+			codeTable.setSelectedRow(address);
+			codeTable.scrollTo(address);
+			codeTable.requestFocus();
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage());
 			currentAddressBox.requestFocus();
@@ -436,88 +396,11 @@ public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener 
 		return table;
 	}
 
-	private JTable createCodeTable() {
-		final JTable table = new JTable();
-		table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.setRowSelectionAllowed(true);
-		table.setFillsViewportHeight(true);
-		CodeTableModel codeModel = new CodeTableModel(lc3);
-		lc3.addListener(codeModel);
-		lc3.getMemory().addListener(codeModel);
-		table.setModel(codeModel);
-		
-		table.getColumnModel().getColumn(0).setCellRenderer(new BreakpointTableCellRenderer(lc3, table));
-		table.getColumnModel().getColumn(1).setCellRenderer(new Hex16TableCellRenderer(lc3));
-		table.getColumnModel().getColumn(2).setCellRenderer(new Binary16TableCellRenderer(lc3));
-		table.getColumnModel().getColumn(3).setCellRenderer(new Hex16TableCellRenderer(lc3));
-		table.getColumnModel().getColumn(4).setCellRenderer(new ASMTableCellRenderer(lc3));
-		
-		table.getColumnModel().getColumn(0).setResizable(false);
-		table.getColumnModel().getColumn(0).setMaxWidth(22);
-		table.getColumnModel().getColumn(0).setMinWidth(22);
-
-		table.getColumnModel().getColumn(1).setResizable(false);
-		table.getColumnModel().getColumn(1).setMaxWidth(80);
-		table.getColumnModel().getColumn(1).setMinWidth(80);
-
-		table.getColumnModel().getColumn(2).setResizable(false);
-		table.getColumnModel().getColumn(2).setMaxWidth(150);
-		table.getColumnModel().getColumn(2).setMinWidth(150);
-
-		table.getColumnModel().getColumn(3).setResizable(false);
-		table.getColumnModel().getColumn(3).setMaxWidth(60);
-		table.getColumnModel().getColumn(3).setMinWidth(60);
-
-		table.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
-					toggleBreakpointAtSelectedAddress();
-				}
-				else if (SwingUtilities.isRightMouseButton(e) && e.getClickCount() == 2) {
-					int row = table.rowAtPoint(e.getPoint());
-					lc3.setPC(row);
-				}
-			}
-		});	
-		
-		// ctrl-B toggles breakpoint
-		table.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-			.put(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK), "toggleBreakpoint");
-		table.getActionMap().put("toggleBreakpoint", new AbstractAction("toggleBreakpoint") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				toggleBreakpointAtSelectedAddress();
-			}
-		});
-		
-		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				if (!e.getValueIsAdjusting()) {
-					updateAddressField();
-					updateCurrentValueField();
-				}
-			}
-		});
-
-		return table;
+	private CodePanel createCodeTable() {
+		CodePanel panel = new CodePanel(lc3);
+		return panel;
 	}
 	
-	private void updateAddressField() {
-		int row = codeTable.getSelectedRow();
-		addressModel.setSelectedItem(""+row);
-	}
-
-	private void updateCurrentValueField() {
-		int row = codeTable.getSelectedRow();
-		if (row != -1) {
-			int value = ((int)lc3.getMemory().getValue(row)) & 0xffff;
-			
-			currentValueField.setNumber(value);
-		}
-	}
-
 	JToolBar createToolbar() {
 		JToolBar toolBar = new JToolBar();
 		
@@ -552,23 +435,11 @@ public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener 
 		return toolBar;
 	}
 
-	protected void toggleBreakpointAtSelectedAddress() {
-		int selectedRow = codeTable.getSelectedRow();
-		lc3.toggleAddressBreakpoint(selectedRow);
-	}
-
 	private void scrollToPC() {
 		int row = lc3.getPC();
-		scrollTo(row);
+		codeTable.scrollTo(row);
 	}
 	
-	private void scrollTo(int row) {
-		Rectangle rect = codeTable.getCellRect(row, 0, true);
-		rect.y = rect.y - 2* rect.height;
-		rect.height = 5 * rect.height;
-		codeTable.scrollRectToVisible(rect);
-	}
-
 	@Override
 	public void registerChanged(LC3 lc3, Register r, short oldValue, short value) {
 	}
@@ -578,23 +449,7 @@ public class MainWindow extends JFrame implements ILC3Listener, IMemoryListener 
 	}
 
 	@Override
-	public void memoryChanged(Memory mem, int addr, short oldValue, short newValue) {
-		if (addr == codeTable.getSelectedRow()) {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					updateCurrentValueField();
-				}
-			});
-		}
-	}
-
-	@Override
 	public void stateChanged(LC3 lc3, State oldState, State newState) {
-	}
-
-	@Override
-	public void memoryRead(Memory mem, int addr, short value) {
 	}
 
 	@Override

@@ -38,7 +38,7 @@ public class CodeTableModel extends AbstractTableModel implements ILC3Listener, 
 	
 	@Override
 	public int getRowCount() {
-		return 0xFFFF;
+		return 0x10000;
 	}
 
 	@Override
@@ -73,21 +73,24 @@ public class CodeTableModel extends AbstractTableModel implements ILC3Listener, 
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 		super.setValueAt(aValue, rowIndex, columnIndex);
 		
-		ICommand cmd = row2cmd.get(rowIndex);
-		if (cmd == null) {
-			cmd = new BR();
-			cmd.init((short) 0);
-			row2cmd.put(rowIndex, cmd);
-		}
-
 		switch(columnIndex) {
 		case 0:
 			lc3.setAddressBreakpoint(rowIndex, (Boolean) aValue);
 			fireTableRowsUpdated(rowIndex, rowIndex);
 			break;
+			
+		case 2:
+		case 3:
+			lc3.getMemory().setValue(rowIndex, ((Number) aValue).shortValue());
+			break;
 		}
 	}
 
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex) {
+		return (columnIndex == 2 || columnIndex == 3);
+	}
+	
 	@Override
 	public void registerChanged(LC3 lc3, Register r, short oldValue, short value) {
 		if (r == Register.PC) {
