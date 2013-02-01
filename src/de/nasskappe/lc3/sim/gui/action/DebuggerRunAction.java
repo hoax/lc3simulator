@@ -11,7 +11,7 @@ import de.nasskappe.lc3.sim.gui.Lc3Utils;
 import de.nasskappe.lc3.sim.gui.MainWindow;
 import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.LC3;
-import de.nasskappe.lc3.sim.maschine.LC3.State;
+import de.nasskappe.lc3.sim.maschine.Lc3State;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
@@ -48,11 +48,11 @@ public class DebuggerRunAction extends AbstractAction implements ILC3Listener {
 	}
 
 	@Override
-	public void stateChanged(LC3 lc3, State oldState, final State newState) {
+	public void stateChanged(LC3 lc3, Lc3State oldState, final Lc3State newState) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				setEnabled(newState == State.STOPPED);
+				setEnabled(newState == Lc3State.STOPPED);
 			}
 		});
 	}

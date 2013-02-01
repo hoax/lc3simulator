@@ -20,21 +20,60 @@ import de.nasskappe.lc3.sim.maschine.cmds.TRAP;
 import de.nasskappe.lc3.sim.maschine.mem.IMemoryListener;
 import de.nasskappe.lc3.sim.maschine.mem.Memory;
 
+/**
+ * The LC3 simulates the Litte Computer 3 as described in
+ * "Introduction to Computing Systems: From bits & gates to C & beyond"
+ * [ISBN-13: 978-0072467505].
+ *
+ * @author Tobias Mayer
+ *
+ */
 public class LC3 {
-	public enum State {
-		RUNNING, STOPPED
-	}
 
+	/**
+	 * the interrupt controller
+	 */
 	private InterruptController ic;
-	private Memory mem;
-	private Map<Register, Short> register;
-	private volatile State state;
 	
+	/**
+	 * the memory
+	 */
+	private Memory mem;
+	
+	/**
+	 * stores the register's values
+	 */
+	private Map<Register, Short> register;
+	
+	/**
+	 * current state of the LC3
+	 */
+	private volatile Lc3State state;
+	
+	/**
+	 * factory to decode the bytes to get the correct command implementation
+	 */
 	private CommandFactory cmdFactory;
+	
+	/**
+	 * listeners that we should notify
+	 */
 	private Set<ILC3Listener> listeners;
+	
+	/**
+	 * addresses at which the simulator should stop execution
+	 */
 	private Set<Integer> addressBreakpoints;
+	
+	/**
+	 * utils to support the simulator
+	 */
 	private Lc3Utils utils = new Lc3Utils(this);
 
+	/**
+	 * listens for changes to the MCR and stops execution if
+	 * clock-bit is cleared
+	 */
 	private IMemoryListener memoryListener = new IMemoryListener() {
 		@Override
 		public void memoryRead(Memory memory, int addr, short value) {
@@ -45,13 +84,16 @@ public class LC3 {
 				short newValue) {
 			// check clock bit (unset by TRAP 0x25 [HALT])
 			if (addr == Memory.ADDR_MCR && !utils.isClockEnabled()) {
-				setState(State.STOPPED);
+				setState(Lc3State.STOPPED);
 			}
 		}
 	};
 	
+	/**
+	 * creates a new LC3 simulator
+	 */
 	public LC3() {
-		state = State.STOPPED;
+		state = Lc3State.STOPPED;
 		listeners = new HashSet<ILC3Listener>();
 		cmdFactory = new CommandFactory();
 		
@@ -65,6 +107,12 @@ public class LC3 {
 		reset();
 	}
 	
+	/**
+	 * loads the programm into the memory at the specified address
+	 * @param startAddress
+	 * @param input
+	 * @throws IOException
+	 */
 	public void loadData(int startAddress, InputStream input) throws IOException {
 		for(int b = input.read(); b != -1; b = input.read()) {
 			b <<= 8;
@@ -72,23 +120,40 @@ public class LC3 {
 			mem.setValue(startAddress++, (short) b);
 		}
 	}
-	
+
+	/**
+	 * executes the next instruction and 
+	 * @return
+	 */
 	public ICommand step() {
+		// get address of instruction to execute
 		Integer addr = getPC();
+		
+		// get instruction
 		short code = mem.getValue(addr);
 		setRegister(Register.IR, code);
+		
+		// decode instruction
 		ICommand cmd = cmdFactory.createCommand((short)code, addr);
+		
+		// increment PC
 		setRegister(Register.PC, (short) (addr + 1));
 
+		// execute
 		cmd.execute(this);
 		
+		// notify listeners
 		fireInstructionExecuted(this, cmd);
 		
+		// handle pending interrupts
 		handleInterrupt();
 		
 		return cmd;
 	}
-	
+
+	/**
+	 * handle the next pending interrupt if there is one
+	 */
 	private void handleInterrupt() {
 		if (ic.isNextInterruptHigherThan(utils.getPriority())) {
 			// save PC and PSR
@@ -99,11 +164,13 @@ public class LC3 {
 			getMemory().setValue(--ssp, oldPC);
 			getMemory().setValue(--ssp, oldPSR);
 			
+			// switch to supervisor mode
 			utils.setSupervisor(true);
 			
+			// set register r6 to supervisor stack
 			setRegister(Register.R6, ssp);
 			
-			// switch to interrupt handling
+			// set PC to address of interrupt handler
 			InterruptRequest ir = ic.getNextInterrupt();
 			short newPC = getMemory().getValue(0x100 + ir.getInterrupt().getVector());
 			utils.setPriority(ir.getPriority());
@@ -111,8 +178,14 @@ public class LC3 {
 		}
 	}
 
+	/**
+	 * execute next instruction. 
+	 * if it is a method call or trap proceed execution until it returns or a
+	 * breakpoint is hit
+	 * @return
+	 */
 	public ICommand stepOver() {
-		setState(State.RUNNING);
+		setState(Lc3State.RUNNING);
 		
 		int oldPC = getPC();
 		
@@ -124,42 +197,76 @@ public class LC3 {
 			}
 		}
 
-		setState(State.STOPPED);
+		setState(Lc3State.STOPPED);
 		return lastCmd;
 	}
 
+	/**
+	 * calls step() repeatedly until the current subroutine returns or a breakpoint is hit
+	 * @return
+	 */
 	public ICommand stepReturn() {
-		setState(State.RUNNING);
+		setState(Lc3State.RUNNING);
 		
 		ICommand lastCmd = null;
-		while(!isStopped() && (!isBreakpointSetFor(getPC()) || lastCmd == null) 
-				&& (lastCmd == null || !(lastCmd.getClass() == RET.class || lastCmd.getClass() == RTI.class))) {
-			lastCmd = step();
-		}
+		int retsUntilReturn = 1;
+		Class<?> returnClass = RET.class;
+		if (utils.isSupervisor())
+			returnClass = RTI.class;
 		
-		setState(State.STOPPED);
+		while (!(
+				isStopped() 
+				|| (isBreakpointSetFor(getPC()) && lastCmd != null) 
+				|| (retsUntilReturn == 0 && lastCmd != null && lastCmd.getClass() == returnClass)
+				)) {
+			lastCmd = step();
+			if (lastCmd.getClass() == TRAP.class 
+					|| lastCmd.getClass() == JSR.class) {
+				retsUntilReturn++;
+			}
+			else if (lastCmd.getClass() == RET.class) {
+				retsUntilReturn--;
+			}
+		}
+				
+		setState(Lc3State.STOPPED);
 		return lastCmd;
 	}
 	
+	/**
+	 * call step() repeatedly until the next breakpoint is hit
+	 * @return
+	 */
 	public ICommand run() {
-		setState(State.RUNNING);
+		setState(Lc3State.RUNNING);
 		
 		ICommand lastCmd = null;
 		while(!isStopped() && (!isBreakpointSetFor(getPC()) || lastCmd == null)) {
 			lastCmd = step();
 		}
 		
-		setState(State.STOPPED);
+		setState(Lc3State.STOPPED);
 		return lastCmd;
 	}
-
-	public void setState(State newState) {
+	
+	/**
+	 * Signals the machine to stop execution
+	 */
+	public void stop() {
+		setState(Lc3State.STOPPED);
+	}
+	
+	/**
+	 * updates the internal status variable and the MCR to the new state 
+	 * @param newState
+	 */
+	private void setState(Lc3State newState) {
 		if (newState != state) {
-			State oldState = state;
+			Lc3State oldState = state;
 			state = newState;
 			
 			// update MCR
-			if (state == State.RUNNING) {
+			if (state == Lc3State.RUNNING) {
 				mem.setValue(Memory.ADDR_MCR, (short) 0x8000);
 			} else {
 				mem.setValue(Memory.ADDR_MCR, (short) 0x0);
@@ -169,19 +276,37 @@ public class LC3 {
 		}
 	}
 	
+	/**
+	 * Determines if the LC3 should be stopped
+	 * @return <code>true</code> if it should be stopped, otherwise <code>false</code>
+	 */
 	public boolean isStopped() {
-		return state == State.STOPPED;
+		return state == Lc3State.STOPPED;
 	}
 	
 	
+	/**
+	 * Determines if a breakpoint is set for the given address
+	 * @param pc
+	 * @return <code>true</code> if a breakpoint is set, otherwise <code>false</code>
+	 */
 	public boolean isBreakpointSetFor(int pc) {
 		return addressBreakpoints.contains(pc);
 	}
 	
+	/**
+	 * Returns a collection with all currently set breakpoints
+	 * @return
+	 */
 	public Set<Integer> getAddressBreakpoints() {
-		return Collections.unmodifiableSet(addressBreakpoints);
+		return Collections.unmodifiableSet(new HashSet<Integer>(addressBreakpoints));
 	}
 	
+	/**
+	 * Toggles a breakpoint on the given address.
+	 * @param address
+	 * @return <code>true</code> a breakpoint has been set, otherwise <code>false</code>
+	 */
 	public boolean toggleAddressBreakpoint(Integer address) {
 		boolean isBreakpointSet = isBreakpointSetFor(address);
 
@@ -190,20 +315,38 @@ public class LC3 {
 		return !isBreakpointSet;
 	}
 
+	/**
+	 * notifies the listeners that an instruction was executed
+	 * @param lc3 the lc3 that executed that instruction
+	 * @param cmd the instruction
+	 */
 	private void fireInstructionExecuted(LC3 lc3, ICommand cmd) {
 		for(ILC3Listener l : listeners) {
 			l.instructionExecuted(lc3, cmd);
 		}
 	}
 
+	/**
+	 * returns the unsigned value of register PC
+	 * @return
+	 */
 	public int getPC() {
 		return ((int)register.get(Register.PC)) & 0xFFFF;
 	}
 	
+	/**
+	 * sets register PC to the given value
+	 * @param pc
+	 */
 	public void setPC(int pc) {
 		setRegister(Register.PC, (short) pc);
 	}
 	
+	/**
+	 * sets a register to the given value
+	 * @param register
+	 * @param value
+	 */
 	public void setRegister(Register register, Short value) {
 		Short oldValue = this.register.get(register);
 		this.register.put(register, value);
@@ -219,6 +362,11 @@ public class LC3 {
 		fireRegisterChanged(register, oldValue, value);
 	}
 	
+	/**
+	 * gets the registers current value
+	 * @param register
+	 * @return
+	 */
 	public Short getRegister(Register register) {
 		Short value = this.register.get(register);
 		if (value == null) {
@@ -227,6 +375,10 @@ public class LC3 {
 		return value;
 	}
 
+	/**
+	 * updates the CC depending on value being zero/negative/positive
+	 * @param value
+	 */
 	public void updateCC(short value) {
 		Register.CC_Value ccValue = Register.CC_Value.Z;
 		if (value > 0)
@@ -238,32 +390,61 @@ public class LC3 {
 		utils.setCC(ccValue.getBits());
 	}
 	
+	/**
+	 * returns the current CC value
+	 * @return
+	 */
 	public CC_Value getCC() {
 		short val = register.get(Register.CC);
 		return CC_Value.values()[val];
 	}
 	
-	private void fireStateChanged(State oldState, State newState) {
+	/**
+	 * notifies listeners that the lc3's state has changed form oldState to newState
+	 * @param oldState
+	 * @param newState
+	 */
+	private void fireStateChanged(Lc3State oldState, Lc3State newState) {
 		for (ILC3Listener l : listeners) {
 			l.stateChanged(this, oldState, newState);
 		}
 	}
 
+	/**
+	 * adds a listener to be notified
+	 * @param listener
+	 */
 	public void addListener(ILC3Listener listener) {
 		listeners.add(listener);
 		listener.stateChanged(this, state, state);
 	}
 	
+	/**
+	 * removes a listener
+	 * @param listener
+	 * @return
+	 */
 	public boolean removeListener(ILC3Listener listener) {
 		return listeners.remove(listener);
 	}
 	
+	/**
+	 * notifies listeners that a register's value changed
+	 * @param register
+	 * @param oldValue
+	 * @param value
+	 */
 	private void fireRegisterChanged(Register register, short oldValue, short value) {
 		for(ILC3Listener l : listeners) {
 			l.registerChanged(this, register, oldValue, value);
 		}
 	}
 
+	/**
+	 * sets/removes a breakpoint at address depend
+	 * @param address address to add/remove breakpoint
+	 * @param aValue <code>true</code> if the breakpoint should be set, <code>false</code> if it should be deleted
+	 */
 	public void setAddressBreakpoint(Integer address, Boolean aValue) {
 		if (aValue) {
 			addressBreakpoints.add(address);
@@ -273,15 +454,23 @@ public class LC3 {
 		
 		fireBreakpointChanged(address, aValue);
 	}
-	
+
+	/**
+	 * notifies listeners that a breakpoint was added/removed
+	 * @param address
+	 * @param set
+	 */
 	private void fireBreakpointChanged(int address, boolean set) {
 		for(ILC3Listener l : listeners) {
 			l.breakpointChanged(this, address, set);
 		}
 	}
 	
+	/**
+	 * reset the machine, clear memory, load lc3os again
+	 */
 	public void reset() {
-		setState(State.STOPPED);
+		setState(Lc3State.STOPPED);
 		
 		for(int addr = 0; addr < 0x10000; addr++) {
 			mem.setValue(addr, (short) 0);
@@ -321,14 +510,26 @@ public class LC3 {
 		updateCC((short) 0);
 	}
 
+	/**
+	 * returns the memory
+	 * @return
+	 */
 	public Memory getMemory() {
 		return mem;
 	}
 
+	/**
+	 * returns the interrupt controller
+	 * @return
+	 */
 	public InterruptController getInterruptController() {
 		return ic;
 	}
 
+	/**
+	 * returns the utils
+	 * @return
+	 */
 	public Lc3Utils getUtils() {
 		return utils;
 	}

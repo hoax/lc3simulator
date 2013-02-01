@@ -7,7 +7,7 @@ import javax.swing.table.AbstractTableModel;
 
 import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.LC3;
-import de.nasskappe.lc3.sim.maschine.LC3.State;
+import de.nasskappe.lc3.sim.maschine.Lc3State;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.BR;
 import de.nasskappe.lc3.sim.maschine.cmds.CommandFactory;
@@ -107,7 +107,7 @@ public class CodeTableModel extends AbstractTableModel implements ILC3Listener, 
 	}
 
 	@Override
-	public void stateChanged(LC3 lc3, State oldState, State newState) {
+	public void stateChanged(LC3 lc3, Lc3State oldState, Lc3State newState) {
 	}
 
 	@Override

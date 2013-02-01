@@ -8,7 +8,7 @@ public interface ILC3Listener {
 	
 	void instructionExecuted(LC3 lc3, ICommand cmd);
 
-	void stateChanged(LC3 lc3, LC3.State oldState, LC3.State newState);
+	void stateChanged(LC3 lc3, Lc3State oldState, Lc3State newState);
 
 	void breakpointChanged(LC3 lc3, int address, boolean set);
 }

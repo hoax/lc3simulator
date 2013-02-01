@@ -44,7 +44,7 @@ import de.nasskappe.lc3.sim.gui.renderer.Hex16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.LabelTableCellRenderer;
 import de.nasskappe.lc3.sim.maschine.ILC3Listener;
 import de.nasskappe.lc3.sim.maschine.LC3;
-import de.nasskappe.lc3.sim.maschine.LC3.State;
+import de.nasskappe.lc3.sim.maschine.Lc3State;
 import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
@@ -449,7 +449,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	}
 
 	@Override
-	public void stateChanged(LC3 lc3, State oldState, State newState) {
+	public void stateChanged(LC3 lc3, Lc3State oldState, Lc3State newState) {
 	}
 
 	@Override
