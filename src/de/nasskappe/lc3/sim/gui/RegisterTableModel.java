@@ -1,5 +1,6 @@
 package de.nasskappe.lc3.sim.gui;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 import de.nasskappe.lc3.sim.maschine.ILC3Listener;
@@ -17,6 +18,10 @@ public class RegisterTableModel extends AbstractTableModel implements ILC3Listen
 	};
 	
 	private LC3 lc3;
+	
+	public RegisterTableModel(LC3 lc3) {
+		this.lc3 = lc3;
+	}
 
 	@Override
 	public int getRowCount() {
@@ -130,8 +135,6 @@ public class RegisterTableModel extends AbstractTableModel implements ILC3Listen
 
 	@Override
 	public void registerChanged(LC3 lc3, Register r, short oldValue, short value) {
-		this.lc3 = lc3;
-		fireTableDataChanged();
 	}
 
 	@Override
@@ -148,6 +151,12 @@ public class RegisterTableModel extends AbstractTableModel implements ILC3Listen
 
 	@Override
 	public void stateChanged(LC3 lc3, Lc3State oldState, Lc3State newState) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				fireTableDataChanged();
+			}
+		});
 	}
 
 	@Override

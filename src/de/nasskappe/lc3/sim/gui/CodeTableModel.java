@@ -3,6 +3,7 @@ package de.nasskappe.lc3.sim.gui;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 
 import de.nasskappe.lc3.sim.maschine.ILC3Listener;
@@ -26,6 +27,8 @@ public class CodeTableModel extends AbstractTableModel implements ILC3Listener, 
 	private Map<Integer, ICommand> row2cmd = new HashMap<Integer, ICommand>(128);
 	private CommandFactory factory = new CommandFactory();
 	private LC3 lc3;
+
+	private int oldPC;
 	
 	public CodeTableModel(LC3 lc3) {
 		this.lc3 = lc3;
@@ -93,12 +96,8 @@ public class CodeTableModel extends AbstractTableModel implements ILC3Listener, 
 	
 	@Override
 	public void registerChanged(LC3 lc3, Register r, short oldValue, short value) {
-		if (r == Register.PC) {
-			int pc = ((int)value) & 0xffff;
-			int oldPC = ((int)oldValue) & 0xffff;
-			
-			fireTableRowsUpdated(oldPC, oldPC);
-			fireTableRowsUpdated(pc, pc);
+		if (lc3.isStopped() && r == Register.PC) {
+			updatePC();
 		}
 	}
 
@@ -108,18 +107,40 @@ public class CodeTableModel extends AbstractTableModel implements ILC3Listener, 
 
 	@Override
 	public void stateChanged(LC3 lc3, Lc3State oldState, Lc3State newState) {
+		if (newState == Lc3State.STOPPED) {
+			updatePC();
+		}
+	}
+	
+	private void updatePC() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				int pc = lc3.getPC();
+				
+				fireTableRowsUpdated(oldPC, oldPC);
+				fireTableRowsUpdated(pc, pc);
+				
+				oldPC = pc;
+			}
+		});
 	}
 
 	@Override
-	public void memoryChanged(Memory memory, int addr, short oldValue,
-			short newValue) {
-		if (newValue == 0) {
-			row2cmd.remove((Integer) addr);
-		} else {
-			ICommand cmd = factory.createCommand(newValue, addr);
-			row2cmd.put(addr, cmd);
-		}
-		fireTableRowsUpdated(addr, addr);
+	public void memoryChanged(Memory memory, final int addr, short oldValue,
+			final short newValue) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				if (newValue == 0) {
+					row2cmd.remove((Integer) addr);
+				} else {
+					ICommand cmd = factory.createCommand(newValue, addr);
+					row2cmd.put(addr, cmd);
+				}
+				fireTableRowsUpdated(addr, addr);
+			}
+		});
 	}
 
 	@Override
@@ -127,9 +148,14 @@ public class CodeTableModel extends AbstractTableModel implements ILC3Listener, 
 	}
 
 	@Override
-	public void breakpointChanged(LC3 lc3, int address, boolean set) {
+	public void breakpointChanged(LC3 lc3, final int address, boolean set) {
 		// triggers redraw -> show/hide breakpoint icon
-		fireTableRowsUpdated(address, address); 
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				fireTableRowsUpdated(address, address);
+			}
+		});
 	}
 	
 }

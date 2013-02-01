@@ -13,6 +13,7 @@ public class BinaryFormatter implements IValueFormatter {
 	
 	@Override
 	public String format(int value) {
+		value = value & 0xFFFF;
 		sb.setLength(0);
 		sb.append("b ");
 		sb.append(padLeft(Integer.toString(value, 2), 16, '0'));
