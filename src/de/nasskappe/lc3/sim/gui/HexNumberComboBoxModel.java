@@ -10,7 +10,7 @@ import javax.swing.ComboBoxModel;
 import de.nasskappe.lc3.sim.gui.formatter.HexFormatter;
 import de.nasskappe.lc3.sim.gui.formatter.IValueFormatter;
 
-public class HexNumberComboBoxModel extends AbstractListModel<String> implements ComboBoxModel<String> {
+public class HexNumberComboBoxModel extends AbstractListModel implements ComboBoxModel {
 
 	List<String> addresses = new ArrayList<String>();
 	Object selectedObject;

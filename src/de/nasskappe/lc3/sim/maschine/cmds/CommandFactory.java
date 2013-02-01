@@ -5,7 +5,7 @@ import java.util.List;
 
 public class CommandFactory {
 
-	private List<Class<? extends ICommand>> mapping = new ArrayList<>(16);
+	private List<Class<? extends ICommand>> mapping = new ArrayList<Class<? extends ICommand>>(16);
 	{
 		mapping.add(BR.class); // 0000
 		mapping.add(ADD.class); // 0001

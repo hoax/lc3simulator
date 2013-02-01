@@ -8,11 +8,6 @@ public class Lc3Exception extends Exception {
 		super();
 	}
 
-	public Lc3Exception(String message, Throwable cause,
-			boolean enableSuppression, boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
-
 	public Lc3Exception(String message, Throwable cause) {
 		super(message, cause);
 	}

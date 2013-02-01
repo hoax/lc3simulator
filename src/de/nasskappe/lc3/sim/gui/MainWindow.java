@@ -64,7 +64,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	private ResetAction resetAction;
 	
 	private JButton btnGo;
-	private JComboBox<String> currentAddressBox;
+	private JComboBox currentAddressBox;
 	private HexNumberComboBoxModel addressModel;
 	private ConsoleWindow console;
 	
@@ -240,7 +240,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		
 		addressModel = new HexNumberComboBoxModel();
 		addressModel.addAddress("0x3000");
-		currentAddressBox = new JComboBox<String>(addressModel);
+		currentAddressBox = new JComboBox(addressModel);
 		currentAddressBox.setEditable(true);
 		GridBagConstraints gbc_currentAddressBox = new GridBagConstraints();
 		gbc_currentAddressBox.fill = GridBagConstraints.HORIZONTAL;
