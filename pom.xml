@@ -1,0 +1,33 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.nasskappe.lc3.sim</groupId>
+  <artifactId>lc3simulator</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>lc3simulator</name>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>tests</testSourceDirectory>
+    <resources>
+      <resource>
+        <directory>src</directory>
+        <excludes>
+          <exclude>**/*.java</exclude>
+        </excludes>
+      </resource>
+    </resources>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <description>Alternative cross-platform simulator for the LC-3 as described in &quot;Introduction to Computing Systems: From bits &amp; gates to C &amp; beyond&quot; [ISBN-13: 978-0072467505] </description>
+  <scm>
+  	<url>https://github.com/hoax/lc3simulator</url>
+  </scm>
+</project>
