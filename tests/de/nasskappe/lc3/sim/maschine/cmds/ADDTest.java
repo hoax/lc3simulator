@@ -1,6 +1,7 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -33,9 +34,10 @@ public class ADDTest {
 		assertEquals(-16, add.getImm());
 	}
 
-	@Test(expected=IllegalOpcodeException.class)
+	@Test
 	public void test_invalid_opcode() throws IllegalOpcodeException {
 		ADD add = new ADD();
 		add.init(b("0001 111 101 0 11 000"));
+		assertTrue(add.isIllegal());
 	}
 }

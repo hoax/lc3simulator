@@ -1,5 +1,7 @@
 package de.nasskappe.lc3.sim.maschine.cmds;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 public class RETTest {
@@ -14,10 +16,11 @@ public class RETTest {
 		ret.init(b("1100 000 111 000000"));
 	}
 
-	@Test(expected=IllegalOpcodeException.class)
+	@Test
 	public void testInvalid() throws Exception {
 		RET ret = new RET();
 		ret.init(b("1100 010 111 000000"));
+		assertTrue(ret.isIllegal());
 	}
 	
 }

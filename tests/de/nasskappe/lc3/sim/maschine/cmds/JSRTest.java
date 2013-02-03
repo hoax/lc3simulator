@@ -2,6 +2,7 @@ package de.nasskappe.lc3.sim.maschine.cmds;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -31,10 +32,11 @@ public class JSRTest {
 		assertNull(jsr.getBaseR());
 	}
 	
-	@Test(expected=IllegalOpcodeException.class)
+	@Test
 	public void test_invalid() throws IllegalOpcodeException {
 		JSR jsr = new JSR();
 		jsr.init(b("0100 0 101 0101 0110"));
+		assertTrue(jsr.isIllegal());
 	}		
 
 	@Test
