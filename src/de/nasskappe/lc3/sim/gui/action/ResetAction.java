@@ -16,7 +16,7 @@ public class ResetAction extends AbstractAction {
 
 		this.lc3 = lc3;
 		
-		ImageIcon icon = new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/pause.gif"));
+		ImageIcon icon = new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/reset.gif"));
 
 		putValue(NAME, "reset");
 		putValue(SHORT_DESCRIPTION, "resets the lc3s memory & register values");
