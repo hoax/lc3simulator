@@ -7,7 +7,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -92,7 +96,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	 * Create the frame.
 	 */
 	public MainWindow() {
-		setTitle("Lc3 Simulator");
+		updateTitleWithVersion();
 		
 		lc3 = new LC3();
 		lc3.addListener(this);
@@ -138,6 +142,22 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		lc3.reset();
 	}
 	
+	private void updateTitleWithVersion() {
+		setTitle("LC3 Simulator");
+
+		URL url = getClass().getProtectionDomain().getCodeSource().getLocation();
+		try {
+			String file = url.getFile();
+			JarFile jf = new JarFile(file);
+			Manifest mf = jf.getManifest();
+			
+			String version = mf.getMainAttributes().getValue("SCM-Revision");
+			setTitle(getTitle() + " - " + version);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private ConsoleWindow createConsole() {
 		ConsoleWindow console = new ConsoleWindow(this, lc3);
 		console.setAlwaysOnTop(true);
