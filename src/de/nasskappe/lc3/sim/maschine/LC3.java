@@ -2,6 +2,7 @@ package de.nasskappe.lc3.sim.maschine;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -469,17 +470,22 @@ public class LC3 {
 		}
 		
 		InputStream osStream = getClass().getResourceAsStream("lc3os.obj");
+		InputStream symStream = getClass().getResourceAsStream("lc3os.sym");
 		assert(osStream != null);
+		assert(symStream != null);
 		
+		InputStreamReader reader = new InputStreamReader(symStream);
 		try {
 			int addr = osStream.read() << 8;
 			addr |= osStream.read();
 			
-			utils.loadData(addr, osStream);
+			getUtils().loadData(addr, osStream);
+			getSymbolTable().addSymbolsFrom(reader);
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		} finally {
 			try {
+				reader.close();
 				osStream.close();
 			} catch (IOException e) {
 				throw new RuntimeException(e.getMessage(), e);

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -56,11 +57,25 @@ public class SymbolTable {
 	
 	public void addSymbolsFromFile(File file) {
 		file = getSymFile(file);
-		
-		Pattern p = Pattern.compile("//\\s+(\\S+)\\s+(\\d+).*");
-		BufferedReader reader = null;
+
+		Reader reader;
 		try {
-			reader = new BufferedReader(new FileReader(file));
+			reader = new FileReader(file);
+			addSymbolsFrom(reader);
+			try {
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void addSymbolsFrom(Reader input) {
+		Pattern p = Pattern.compile("//\\s+(\\S+)\\s+(\\d+).*");
+		BufferedReader reader = new BufferedReader(input);
+		try {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				Matcher m = p.matcher(line);
@@ -72,16 +87,8 @@ public class SymbolTable {
 					add(symbol, address);
 				}
 			}
-		} catch (FileNotFoundException e) {
 		} catch (IOException e) {
 			e.printStackTrace();
-		} finally {
-			try {
-				if (reader != null) {
-					reader.close();
-				}
-			} catch (IOException e) {
-			}
 		}
 	}
 
