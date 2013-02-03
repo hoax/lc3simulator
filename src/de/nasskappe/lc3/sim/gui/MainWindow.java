@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
@@ -27,6 +29,7 @@ import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -416,7 +419,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		lc3.addListener(model);
 		model.registerChanged(lc3, Register.IR, (short) 0, (short) 0);
 
-		JTable table = new JTable();
+		final JTable table = new JTable();
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setRowSelectionAllowed(false);
 		table.setFillsViewportHeight(true);
@@ -429,7 +432,18 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		table.setDefaultRenderer(Integer.class, new Hex16TableCellRenderer(null));
 
 		table.setDefaultEditor(Integer.class, new NumberCellEditor());
-		
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
+					System.out.println(table.columnAtPoint(e.getPoint()));
+					if (table.columnAtPoint(e.getPoint()) == 4
+							&& table.rowAtPoint(e.getPoint()) == 1) {
+						scrollToPC();
+					}
+				}
+			}
+		});
 		return table;
 	}
 
