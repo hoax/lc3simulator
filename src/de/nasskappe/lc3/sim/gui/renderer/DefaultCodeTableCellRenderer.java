@@ -12,7 +12,7 @@ import de.nasskappe.lc3.sim.maschine.LC3;
 
 public class DefaultCodeTableCellRenderer extends DefaultTableCellRenderer {
 
-	public static Color PC_COLOR = Color.CYAN;
+	public static Color PC_COLOR = new Color(0xa6f271);
 	
 	LC3 lc3;
 	

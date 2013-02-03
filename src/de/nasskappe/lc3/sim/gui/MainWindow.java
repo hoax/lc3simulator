@@ -37,6 +37,7 @@ import de.nasskappe.lc3.sim.gui.action.DebuggerStepReturnAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStopAction;
 import de.nasskappe.lc3.sim.gui.action.LoadFileAction;
 import de.nasskappe.lc3.sim.gui.action.ResetAction;
+import de.nasskappe.lc3.sim.gui.action.SetPCToCurrentSelectionAction;
 import de.nasskappe.lc3.sim.gui.action.ShowConsoleAction;
 import de.nasskappe.lc3.sim.gui.console.ConsoleWindow;
 import de.nasskappe.lc3.sim.gui.editor.NumberCellEditor;
@@ -53,7 +54,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	private JPanel contentPane;
 	private JTable registerTable;
 	private LC3 lc3;
-	private CodePanel codeTable;
+	private CodePanel codePanel;
 	private LoadFileAction loadFileAction;
 	private DebuggerRunAction runAction;
 	private DebuggerStopAction stopAction;
@@ -61,6 +62,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	private DebuggerStepOverAction stepOverAction;
 	private DebuggerStepReturnAction stepReturnAction;
 	private ShowConsoleAction showConsoleAction;
+	private SetPCToCurrentSelectionAction setPcToCurrentSelectionAction;
 	private ResetAction resetAction;
 	
 	private JButton btnGo;
@@ -115,6 +117,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		stepIntoAction = new DebuggerStepIntoAction(lc3.getUtils(), scrollToPcRunnable);
 		stepOverAction = new DebuggerStepOverAction(lc3.getUtils(), scrollToPcRunnable);
 		stepReturnAction = new DebuggerStepReturnAction(lc3.getUtils(), scrollToPcRunnable);
+		setPcToCurrentSelectionAction = new SetPCToCurrentSelectionAction(lc3, codePanel.getTable());
 		
 		lc3.addListener(loadFileAction);
 		lc3.addListener(runAction);
@@ -130,7 +133,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 
 		scrollToPC();
 
-		codeTable.setSelectedRow(0x3000);
+		codePanel.setSelectedRow(0x3000);
 		
 		lc3.reset();
 	}
@@ -150,10 +153,10 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		numberDisplay = new AddressValueDisplay();
 		panel.add(numberDisplay, BorderLayout.NORTH);
 		
-		codeTable = createCodeTable();
-		panel.add(codeTable, BorderLayout.CENTER);
+		codePanel = createCodeTable();
+		panel.add(codePanel, BorderLayout.CENTER);
 		
-		codeTable.getTable().getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+		codePanel.getTable().getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				if (!e.getValueIsAdjusting()) {
@@ -162,10 +165,10 @@ public class MainWindow extends JFrame implements ILC3Listener {
 			}
 		});
 		
-		codeTable.getTableModel().addTableModelListener(new TableModelListener() {
+		codePanel.getTableModel().addTableModelListener(new TableModelListener() {
 			@Override
 			public void tableChanged(TableModelEvent e) {
-				int row = codeTable.getTable().getSelectedRow();
+				int row = codePanel.getTable().getSelectedRow();
 				
 				if (e.getFirstRow() >= row && e.getLastRow() <= row) {
 					updateNumberDisplay();
@@ -177,9 +180,9 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	}
 	
 	private void updateNumberDisplay() {
-		int row = codeTable.getTable().getSelectedRow();
+		int row = codePanel.getTable().getSelectedRow();
 		if (row != -1) {
-			Number n = (Number) codeTable.getTableModel().getValueAt(row, 2);
+			Number n = (Number) codePanel.getTableModel().getValueAt(row, 2);
 			numberDisplay.setNumber(row, n.shortValue());
 		}
 	}
@@ -283,9 +286,9 @@ public class MainWindow extends JFrame implements ILC3Listener {
 			addressString = String.format("%04x", address);
 			addressModel.addAddress(address);
 			
-			codeTable.setSelectedRow(address);
-			codeTable.scrollTo(address);
-			codeTable.requestFocus();
+			codePanel.setSelectedRow(address);
+			codePanel.scrollTo(address);
+			codePanel.requestFocus();
 			
 			return true;
 		} catch (NumberFormatException e) {
@@ -380,6 +383,12 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		JMenuItem stepReturnBtn = new JMenuItem(stepReturnAction);
 		stepReturnBtn.setAccelerator(KeyStroke.getKeyStroke("F7"));
 		debugMenu.add(stepReturnBtn);
+
+		debugMenu.add(new JSeparator());
+		
+		JMenuItem setPcBtn = new JMenuItem(setPcToCurrentSelectionAction);
+		stepReturnBtn.setAccelerator(KeyStroke.getKeyStroke("F10"));
+		debugMenu.add(setPcBtn);
 	}
 
 	private JTable createRegisterTable() {
@@ -445,7 +454,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 
 	private void scrollToPC() {
 		int row = lc3.getPC();
-		codeTable.scrollTo(row);
+		codePanel.scrollTo(row);
 	}
 	
 	@Override
