@@ -12,10 +12,10 @@ public class ResetAction extends AbstractAction {
 
 	private LC3 lc3;
 
-
 	public ResetAction(LC3 lc3) {
 
 		this.lc3 = lc3;
+		
 		ImageIcon icon = new ImageIcon(MainWindow.class.getResource("/de/nasskappe/lc3/sim/gui/icons/pause.gif"));
 
 		putValue(NAME, "reset");

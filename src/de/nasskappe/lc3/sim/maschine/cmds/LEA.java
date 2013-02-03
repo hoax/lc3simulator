@@ -31,7 +31,7 @@ public class LEA extends AbstractCommand {
 		return dr;
 	}
 	
-	public short getPcOffset() {
+	public short getPCOffset() {
 		return pcOffset;
 	}
 

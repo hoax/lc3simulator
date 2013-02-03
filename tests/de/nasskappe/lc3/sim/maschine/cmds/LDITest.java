@@ -18,7 +18,7 @@ public class LDITest {
 		ld.init(b("1010 111 0 1111 1111"));
 		
 		assertEquals(Register.R7, ld.getDr());
-		assertEquals(0xFF, ld.getPcOffset());
+		assertEquals(0xFF, ld.getPCOffset());
 	}
 
 	@Test
@@ -27,7 +27,7 @@ public class LDITest {
 		ld.init(b("1010 000 1 1111 1111"));
 		
 		assertEquals(Register.R0, ld.getDr());
-		assertEquals(-1, ld.getPcOffset());
+		assertEquals(-1, ld.getPCOffset());
 	}
 
 }

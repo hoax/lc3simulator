@@ -18,7 +18,7 @@ public class STITest {
 		sti.init(b("1011 111 0 1111 1111"));
 		
 		assertEquals(Register.R7, sti.getSr());
-		assertEquals(0xFF, sti.getPcOffset());
+		assertEquals(0xFF, sti.getPCOffset());
 	}
 
 	@Test
@@ -27,7 +27,7 @@ public class STITest {
 		sti.init(b("1011 000 1 1111 1101"));
 		
 		assertEquals(Register.R0, sti.getSr());
-		assertEquals(-3, sti.getPcOffset());
+		assertEquals(-3, sti.getPCOffset());
 	}
 
 }

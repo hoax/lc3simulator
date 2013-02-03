@@ -21,6 +21,7 @@ import de.nasskappe.lc3.sim.gui.editor.NumberCellEditor;
 import de.nasskappe.lc3.sim.gui.formatter.BinaryFormatter;
 import de.nasskappe.lc3.sim.gui.formatter.HexFormatter;
 import de.nasskappe.lc3.sim.gui.renderer.ASMTableCellRenderer;
+import de.nasskappe.lc3.sim.gui.renderer.AddressTableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.Binary16TableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.BreakpointTableCellRenderer;
 import de.nasskappe.lc3.sim.gui.renderer.Hex16TableCellRenderer;
@@ -52,7 +53,7 @@ public class CodePanel extends JPanel {
 		
 		table.getColumnModel().getColumn(0).setCellRenderer(new BreakpointTableCellRenderer(lc3, table));
 		
-		table.getColumnModel().getColumn(1).setCellRenderer(new Hex16TableCellRenderer(lc3));
+		table.getColumnModel().getColumn(1).setCellRenderer(new AddressTableCellRenderer(lc3));
 		
 		table.getColumnModel().getColumn(2).setCellRenderer(new Binary16TableCellRenderer(lc3));
 		table.getColumnModel().getColumn(2).setCellEditor(new NumberCellEditor(true, new BinaryFormatter()));
@@ -66,8 +67,8 @@ public class CodePanel extends JPanel {
 		table.getColumnModel().getColumn(0).setMaxWidth(22);
 		table.getColumnModel().getColumn(0).setMinWidth(22);
 
-		table.getColumnModel().getColumn(1).setResizable(false);
-		table.getColumnModel().getColumn(1).setMaxWidth(80);
+		table.getColumnModel().getColumn(1).setResizable(true);
+		table.getColumnModel().getColumn(1).setMaxWidth(180);
 		table.getColumnModel().getColumn(1).setMinWidth(80);
 
 		table.getColumnModel().getColumn(2).setResizable(false);

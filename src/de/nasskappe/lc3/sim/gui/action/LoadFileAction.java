@@ -48,7 +48,9 @@ public class LoadFileAction extends AbstractAction implements ILC3Listener {
 		int result = fc.showOpenDialog(window);
 		if (result == JFileChooser.APPROVE_OPTION) {
 			try {
-				loadDataFromFile(fc.getSelectedFile());
+				File file = fc.getSelectedFile();
+				loadDataFromFile(file);
+				lc3.getSymbolTable().addSymbolsFromFile(file);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -60,7 +62,7 @@ public class LoadFileAction extends AbstractAction implements ILC3Listener {
 		FileInputStream input = new FileInputStream(selectedFile);
 		int addr = input.read() << 8 | input.read();
 		
-		lc3.loadData(addr, input);
+		lc3.getUtils().loadData(addr, input);
 		lc3.setPC(addr);
 	}
 

@@ -32,7 +32,7 @@ public class ST extends AbstractCommand {
 		return sr;
 	}
 	
-	public short getPcOffset() {
+	public short getPCOffset() {
 		return pcOffset;
 	}
 

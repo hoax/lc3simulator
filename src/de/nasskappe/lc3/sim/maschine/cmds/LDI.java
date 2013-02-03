@@ -33,7 +33,7 @@ public class LDI extends AbstractCommand {
 		return dr;
 	}
 	
-	public short getPcOffset() {
+	public short getPCOffset() {
 		return pcOffset;
 	}
 

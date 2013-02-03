@@ -64,7 +64,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	private ResetAction resetAction;
 	
 	private JButton btnGo;
-	private JComboBox currentAddressBox;
+	private JComboBox goToAddressBox;
 	private HexNumberComboBoxModel addressModel;
 	private ConsoleWindow console;
 	
@@ -240,23 +240,24 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		
 		addressModel = new HexNumberComboBoxModel();
 		addressModel.addAddress("0x3000");
-		currentAddressBox = new JComboBox(addressModel);
-		currentAddressBox.setEditable(true);
+		goToAddressBox = new JComboBox(addressModel);
+		goToAddressBox.setEditable(true);
 		GridBagConstraints gbc_currentAddressBox = new GridBagConstraints();
 		gbc_currentAddressBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_currentAddressBox.insets = new Insets(0, 0, 5, 5);
 		gbc_currentAddressBox.gridx = 1;
 		gbc_currentAddressBox.gridy = 0;
-		panel.add(currentAddressBox, gbc_currentAddressBox);
+		panel.add(goToAddressBox, gbc_currentAddressBox);
 		
 		ActionListener goToAddressAction = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				addressModel.addAddress(currentAddressBox.getSelectedItem());
-				goToAddress(currentAddressBox.getSelectedItem().toString());
+				if (goToAddress(goToAddressBox.getSelectedItem().toString())) {
+					addressModel.addAddress(goToAddressBox.getSelectedItem());
+				}
 			}
 		};
 
-		currentAddressBox.addActionListener(goToAddressAction);
+		goToAddressBox.addActionListener(goToAddressAction);
 		
 		btnGo = new JButton("go");
 		btnGo.addActionListener(goToAddressAction);
@@ -270,9 +271,12 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		return panel;
 	}
 
-	protected void goToAddress(String addressString) {
+	protected boolean goToAddress(String addressString) {
 		try {
-			Integer address = NumberUtils.stringToInt(addressString);
+			Integer address = lc3.getSymbolTable().findAddressBySymbol(addressString);
+			if (address == null) {
+				address = NumberUtils.stringToInt(addressString);
+			}
 			
 			address = address & 0xffff;
 			
@@ -282,10 +286,14 @@ public class MainWindow extends JFrame implements ILC3Listener {
 			codeTable.setSelectedRow(address);
 			codeTable.scrollTo(address);
 			codeTable.requestFocus();
+			
+			return true;
 		} catch (NumberFormatException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage());
-			currentAddressBox.requestFocus();
-			currentAddressBox.getEditor().selectAll();
+			goToAddressBox.requestFocus();
+			goToAddressBox.getEditor().selectAll();
+			
+			return false;
 		}
 		
 	}

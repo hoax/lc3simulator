@@ -11,7 +11,7 @@ public class TestMain {
 		FileInputStream input = new FileInputStream("3b.obj");
 		int addr = input.read() << 8 | input.read();
 		
-		lc3.loadData(addr, input);
+		lc3.getUtils().loadData(addr, input);
 		
 		lc3.getMemory().setValue(0x3100, (short) 0x5555);
 		lc3.setPC(0x3000);

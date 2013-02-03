@@ -1,5 +1,7 @@
 package de.nasskappe.lc3.sim.gui;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -7,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.Register;
+import de.nasskappe.lc3.sim.maschine.SymbolTable;
 import de.nasskappe.lc3.sim.maschine.mem.Memory;
 
 /**
@@ -123,9 +126,11 @@ public class Lc3Utils {
 	 * the lc3 which is modified/used
 	 */
 	private LC3 lc3;
+	private SymbolTable symbolTable;
 	
-	public Lc3Utils(LC3 lc3) {
+	public Lc3Utils(LC3 lc3, SymbolTable symbolTable) {
 		this.lc3 = lc3;
+		this.symbolTable = symbolTable;
 	}
 
 	public void run(Runnable postExecute) {
@@ -208,4 +213,24 @@ public class Lc3Utils {
 		priority = priority & BITMASK_PRIORITY; // to be sure set other bits to 0
 		psr = (short) (psr | priority);
 	}
+	
+	/**
+	 * loads the programm into the memory at the specified address
+	 * @param startAddress
+	 * @param input
+	 * @throws IOException
+	 */
+	public void loadData(int startAddress, InputStream input) throws IOException {
+		for(int b = input.read(); b != -1; b = input.read()) {
+			if (symbolTable != null) {
+				symbolTable.removeSymbolForAddress(startAddress);
+			}
+
+			b <<= 8;
+			b |= input.read();
+			lc3.getMemory().setValue(startAddress++, (short) b);
+		}
+	}
+
+
 }

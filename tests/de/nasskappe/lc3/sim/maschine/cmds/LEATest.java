@@ -18,7 +18,7 @@ public class LEATest {
 		lea.init(b("1110 111 0 1111 1111"));
 		
 		assertEquals(Register.R7, lea.getDr());
-		assertEquals(0xFF, lea.getPcOffset());
+		assertEquals(0xFF, lea.getPCOffset());
 	}
 
 	@Test
@@ -27,7 +27,7 @@ public class LEATest {
 		lea.init(b("1110 000 1 1111 1101"));
 		
 		assertEquals(Register.R0, lea.getDr());
-		assertEquals(-3, lea.getPcOffset());
+		assertEquals(-3, lea.getPCOffset());
 	}
 
 }

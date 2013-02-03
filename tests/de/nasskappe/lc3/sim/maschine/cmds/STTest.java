@@ -18,7 +18,7 @@ public class STTest {
 		st.init(b("0011 111 0 1111 1111"));
 		
 		assertEquals(Register.R7, st.getSr());
-		assertEquals(0xFF, st.getPcOffset());
+		assertEquals(0xFF, st.getPCOffset());
 	}
 
 	@Test
@@ -27,7 +27,7 @@ public class STTest {
 		st.init(b("0011 000 1 1111 1101"));
 		
 		assertEquals(Register.R0, st.getSr());
-		assertEquals(-3, st.getPcOffset());
+		assertEquals(-3, st.getPCOffset());
 	}
 
 }

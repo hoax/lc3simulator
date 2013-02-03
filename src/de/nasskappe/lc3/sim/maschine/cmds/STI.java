@@ -32,7 +32,7 @@ public class STI extends AbstractCommand {
 		return sr;
 	}
 	
-	public short getPcOffset() {
+	public short getPCOffset() {
 		return pcOffset;
 	}
 

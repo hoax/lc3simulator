@@ -89,7 +89,12 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 					sb.append("p");
 				
 				sb.append(" ");
-				sb.append(toHexString(cmd.getCodePosition() + 1 + cmd.getPCOffset()));
+				int address = cmd.getCodePosition() + 1 + cmd.getPCOffset();
+				String label = lc3.getSymbolTable().findSymbolByAddress(address);
+				if (label == null) {
+					label = toHexString(address);
+				}
+				sb.append(label);
 			}
 			
 			return sb.toString();
@@ -101,7 +106,13 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 			sb.append(cmd.getASM());
 			sb.append(" ");
 			if (cmd.getBaseR() == null) {
-				sb.append(toHexString(cmd.getCodePosition() + 1 + cmd.getPCOffset()));
+				int address = cmd.getCodePosition() + 1 + cmd.getPCOffset();
+				String label = lc3.getSymbolTable().findSymbolByAddress(address);
+				if (label == null) {
+					label = toHexString(address);
+				}
+				
+				sb.append(label);
 			} else {
 				sb.append(cmd.getBaseR());
 			}
@@ -116,7 +127,14 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 			sb.append(" ");
 			sb.append(cmd.getDr());
 			sb.append(", ");
-			sb.append(toHexString(cmd.getCodePosition() + 1 + cmd.getPCOffset()));
+
+			int address = cmd.getCodePosition() + 1 + cmd.getPCOffset();
+			String label = lc3.getSymbolTable().findSymbolByAddress(address);
+			if (label == null) {
+				label = toHexString(address);
+			}
+
+			sb.append(label);
 			
 			return sb.toString();
 		}
@@ -128,7 +146,14 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 			sb.append(" ");
 			sb.append(cmd.getDr());
 			sb.append(", ");
-			sb.append(toHexString(cmd.getCodePosition() + 1 + cmd.getPcOffset()));
+			
+			int address = cmd.getCodePosition() + 1 + cmd.getPCOffset();
+			String label = lc3.getSymbolTable().findSymbolByAddress(address);
+			if (label == null) {
+				label = toHexString(address);
+			}
+
+			sb.append(label);
 			
 			return sb.toString();
 		}
@@ -154,7 +179,15 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 			sb.append(" ");
 			sb.append(cmd.getDr());
 			sb.append(", ");
-			sb.append(toHexString(cmd.getCodePosition() + 1 + cmd.getPcOffset()));
+
+			
+			int address = cmd.getCodePosition() + 1 + cmd.getPCOffset();
+			String label = lc3.getSymbolTable().findSymbolByAddress(address);
+			if (label == null) {
+				label = toHexString(address);
+			}
+			
+			sb.append(label);
 			
 			return sb.toString();
 		}
@@ -194,7 +227,14 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 			sb.append(" ");
 			sb.append(cmd.getSr());
 			sb.append(", ");
-			sb.append(toHexString(cmd.getCodePosition() + 1 + cmd.getPcOffset()));
+			
+			int address = cmd.getCodePosition() + 1 + cmd.getPCOffset();
+			String label = lc3.getSymbolTable().findSymbolByAddress(address);
+			if (label == null) {
+				label = toHexString(address);
+			}
+
+			sb.append(toHexString(cmd.getCodePosition() + 1 + cmd.getPCOffset()));
 			
 			return sb.toString();
 		}
@@ -206,7 +246,14 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 			sb.append(" ");
 			sb.append(cmd.getSr());
 			sb.append(", ");
-			sb.append(toHexString(cmd.getCodePosition() + 1 + cmd.getPcOffset()));
+			
+			int address = cmd.getCodePosition() + 1 + cmd.getPCOffset();
+			String label = lc3.getSymbolTable().findSymbolByAddress(address);
+			if (label == null) {
+				label = toHexString(address);
+			}
+
+			sb.append(label);
 			
 			return sb.toString();
 		}
@@ -229,36 +276,14 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 		public Object visit(TRAP cmd) {
 			sb.setLength(0);
 			
-			switch (cmd.getTrap()) {
-			case 0x20: 
-				sb.append("GETC");
-				break;
-			case 0x21: 
-				sb.append("OUT");
-				break;
-				
-			case 0x22: 
-				sb.append("PUTS");
-				break;
-				
-			case 0x23: 
-				sb.append("IN");
-				break;
-				
-			case 0x24: 
-				sb.append("PUTSP");
-				break;
-				
-			case 0x25: 
-				sb.append("HALT");
-				break;
-				
-			default:
-				sb.append(cmd.getASM());
-				sb.append(" ");
-				sb.append(toHexString(cmd.getTrap()));
-				break;
+			int address = lc3.getMemory().getValue(cmd.getTrap()) & 0xFFFF;
+			String label = lc3.getSymbolTable().findSymbolByAddress(address);
+			if (label == null) {
+				label = toHexString(cmd.getTrap());
 			}
+			sb.append(cmd.getASM());
+			sb.append(" ");
+			sb.append(label);
 			
 			return sb.toString();
 		}

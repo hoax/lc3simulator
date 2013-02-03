@@ -66,9 +66,14 @@ public class LC3 {
 	private Set<Integer> addressBreakpoints;
 	
 	/**
+	 * maps symbols to memory addresses
+	 */
+	private SymbolTable symbolTable = new SymbolTable();
+	
+	/**
 	 * utils to support the simulator
 	 */
-	private Lc3Utils utils = new Lc3Utils(this);
+	private Lc3Utils utils = new Lc3Utils(this, symbolTable);
 
 	/**
 	 * listens for changes to the MCR and stops execution if
@@ -107,20 +112,6 @@ public class LC3 {
 		reset();
 	}
 	
-	/**
-	 * loads the programm into the memory at the specified address
-	 * @param startAddress
-	 * @param input
-	 * @throws IOException
-	 */
-	public void loadData(int startAddress, InputStream input) throws IOException {
-		for(int b = input.read(); b != -1; b = input.read()) {
-			b <<= 8;
-			b |= input.read();
-			mem.setValue(startAddress++, (short) b);
-		}
-	}
-
 	/**
 	 * executes the next instruction and 
 	 * @return
@@ -471,6 +462,7 @@ public class LC3 {
 	 */
 	public void reset() {
 		setState(Lc3State.STOPPED);
+		getSymbolTable().clear();
 		
 		for(int addr = 0; addr < 0x10000; addr++) {
 			mem.setValue(addr, (short) 0);
@@ -483,7 +475,7 @@ public class LC3 {
 			int addr = osStream.read() << 8;
 			addr |= osStream.read();
 			
-			loadData(addr, osStream);
+			utils.loadData(addr, osStream);
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		} finally {
@@ -533,4 +525,13 @@ public class LC3 {
 	public Lc3Utils getUtils() {
 		return utils;
 	}
+
+	/**
+	 * returns the symboltable
+	 * @return
+	 */
+	public SymbolTable getSymbolTable() {
+		return symbolTable;
+	}
+	
 }
