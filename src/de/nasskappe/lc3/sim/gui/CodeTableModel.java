@@ -54,7 +54,7 @@ public class CodeTableModel extends AbstractTableModel implements ILC3Listener, 
 		ICommand cmd = row2cmd.get(rowIndex);
 		if (cmd == null) {
 			switch(columnIndex) {
-			case 0: return false;
+			case 0: return lc3.isBreakpointSetFor(rowIndex);
 			case 1: return rowIndex;
 			case 2: return 0;
 			case 3: return 0;
