@@ -7,6 +7,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.EventObject;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
@@ -39,7 +40,24 @@ public class CodePanel extends JPanel {
 		
 		setLayout(new BorderLayout());
 		
-		table = new JTable();
+		table = new JTable() {
+			@Override
+			public boolean editCellAt(int row, int column, EventObject e) {
+				if (e instanceof KeyEvent) {
+					KeyEvent k = (KeyEvent) e;
+					
+					if (k.isControlDown() || k.isMetaDown() || k.isAltDown()) {
+						return false;
+					}
+					
+					if (k.getKeyCode() >= KeyEvent.VK_F5
+							&& k.getKeyCode() <= KeyEvent.VK_F10) {
+						return false;
+					}
+				}
+				return super.editCellAt(row, column, e);
+			}
+		};
 		table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setRowSelectionAllowed(true);
 		table.setFillsViewportHeight(true);
