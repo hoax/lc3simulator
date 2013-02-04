@@ -410,7 +410,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		debugMenu.add(new JSeparator());
 		
 		JMenuItem setPcBtn = new JMenuItem(setPcToCurrentSelectionAction);
-		stepReturnBtn.setAccelerator(KeyStroke.getKeyStroke("F10"));
+		setPcBtn.setAccelerator(KeyStroke.getKeyStroke("F10"));
 		debugMenu.add(setPcBtn);
 	}
 
