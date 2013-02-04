@@ -4,7 +4,7 @@ public class DecimalFormatter implements IValueFormatter {
 
 	@Override
 	public String format(int value) {
-		return Integer.toString(value);
+		return Integer.toString(value & 0xFFFF);
 	}
 
 }
