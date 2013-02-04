@@ -17,7 +17,7 @@ public class RTI extends AbstractCommand {
 	@Override
 	public void execute(LC3 lc3) {
 		if (!lc3.getUtils().isSupervisor()) {
-			// TODO exception!
+			lc3.handlePrivilegeModeViolation();
 		} else {
 			short ssp = lc3.getRegister(Register.SSP);
 			short oldPSR = lc3.getMemory().getValue(ssp++);

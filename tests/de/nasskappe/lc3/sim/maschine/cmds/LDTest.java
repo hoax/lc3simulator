@@ -13,7 +13,7 @@ public class LDTest {
 	}
 
 	@Test
-	public void test_positive_offset() throws IllegalOpcodeException {
+	public void test_positive_offset() {
 		LD ld = new LD();
 		ld.init(b("0010 111 0 1111 1111"));
 		
@@ -22,7 +22,7 @@ public class LDTest {
 	}
 
 	@Test
-	public void test_negative_offset() throws IllegalOpcodeException {
+	public void test_negative_offset() {
 		LD ld = new LD();
 		ld.init(b("0010 000 1 1111 1111"));
 		

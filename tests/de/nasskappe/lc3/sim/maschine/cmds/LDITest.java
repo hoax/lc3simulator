@@ -13,7 +13,7 @@ public class LDITest {
 	}
 
 	@Test
-	public void test_positive_offset() throws IllegalOpcodeException {
+	public void test_positive_offset() {
 		LDI ld = new LDI();
 		ld.init(b("1010 111 0 1111 1111"));
 		
@@ -22,7 +22,7 @@ public class LDITest {
 	}
 
 	@Test
-	public void test_negative_offset() throws IllegalOpcodeException {
+	public void test_negative_offset() {
 		LDI ld = new LDI();
 		ld.init(b("1010 000 1 1111 1111"));
 		

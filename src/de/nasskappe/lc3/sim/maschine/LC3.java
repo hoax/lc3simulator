@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.nasskappe.lc3.sim.gui.Lc3Utils;
+import de.nasskappe.lc3.sim.maschine.InterruptController.Interrupt;
 import de.nasskappe.lc3.sim.maschine.InterruptController.InterruptRequest;
 import de.nasskappe.lc3.sim.maschine.Register.CC_Value;
 import de.nasskappe.lc3.sim.maschine.cmds.CommandFactory;
@@ -131,8 +132,13 @@ public class LC3 {
 		// increment PC
 		setRegister(Register.PC, (short) (addr + 1));
 
-		// execute
-		cmd.execute(this);
+		// check if illegal -> handle it
+		if (cmd.isIllegal()) {
+			handleIllegalOpcode();
+		} else {
+			// execute
+			cmd.execute(this);
+		}
 		
 		// notify listeners
 		fireInstructionExecuted(this, cmd);
@@ -148,28 +154,33 @@ public class LC3 {
 	 */
 	private void handleInterrupt() {
 		if (ic.isNextInterruptHigherThan(utils.getPriority())) {
-			// save PC and PSR
-			short oldPSR = getRegister(Register.PSR);
-			short oldPC = getRegister(Register.PC);
-			short ssp = getRegister(Register.SSP);
-			
-			getMemory().setValue(--ssp, oldPC);
-			getMemory().setValue(--ssp, oldPSR);
-			
-			// switch to supervisor mode
-			utils.setSupervisor(true);
-			
-			// set register r6 to supervisor stack
-			setRegister(Register.R6, ssp);
-			
-			// set PC to address of interrupt handler
 			InterruptRequest ir = ic.getNextInterrupt();
-			short newPC = getMemory().getValue(0x100 + ir.getInterrupt().getVector());
-			utils.setPriority(ir.getPriority());
-			setRegister(Register.PC, newPC);
+			
+			handleInterrupt(ir);
 		}
 	}
 
+	private void handleInterrupt(InterruptRequest ir) {
+		// save PC and PSR
+		short oldPSR = getRegister(Register.PSR);
+		short oldPC = getRegister(Register.PC);
+		short ssp = getRegister(Register.SSP);
+		
+		getMemory().setValue(--ssp, oldPC);
+		getMemory().setValue(--ssp, oldPSR);
+		
+		// switch to supervisor mode
+		utils.setSupervisor(true);
+		
+		// set register r6 to supervisor stack
+		setRegister(Register.R6, ssp);
+		
+		// set PC to address of interrupt handler
+		short newPC = getMemory().getValue(0x100 + ir.getInterrupt().getVector());
+		utils.setPriority(ir.getPriority());
+		setRegister(Register.PC, newPC);
+	}
+	
 	/**
 	 * execute next instruction. 
 	 * if it is a method call or trap proceed execution until it returns or a
@@ -439,8 +450,10 @@ public class LC3 {
 	 */
 	public void setAddressBreakpoint(Integer address, Boolean aValue) {
 		if (aValue) {
+			System.out.println("add breakpoint " + address);
 			addressBreakpoints.add(address);
 		} else {
+			System.out.println("remove breakpoint " + address);
 			addressBreakpoints.remove(address);
 		}
 		
@@ -539,5 +552,21 @@ public class LC3 {
 	public SymbolTable getSymbolTable() {
 		return symbolTable;
 	}
-	
+
+	/**
+	 * handle a privilege mode violation
+	 */
+	public void handlePrivilegeModeViolation() {
+		InterruptRequest ir = new InterruptRequest(Interrupt.PRIVILEGE_MODE_VIOLATION, utils.getPriority());
+		handleInterrupt(ir);
+	}
+
+	/**
+	 * handle an illegal opcode
+	 */
+	public void handleIllegalOpcode() {
+		InterruptRequest ir = new InterruptRequest(Interrupt.ILLEGAL_OPCODE, utils.getPriority());
+		handleInterrupt(ir);
+	}
+
 }

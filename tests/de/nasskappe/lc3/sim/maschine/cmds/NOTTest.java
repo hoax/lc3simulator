@@ -14,7 +14,7 @@ public class NOTTest {
 	}
 
 	@Test
-	public void testValid() throws IllegalOpcodeException {
+	public void testValid() {
 		NOT not = new NOT();
 		not.init(b("1001 111 000 111111"));
 		

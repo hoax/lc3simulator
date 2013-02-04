@@ -35,7 +35,7 @@ public class ADDTest {
 	}
 
 	@Test
-	public void test_invalid_opcode() throws IllegalOpcodeException {
+	public void test_invalid_opcode() {
 		ADD add = new ADD();
 		add.init(b("0001 111 101 0 11 000"));
 		assertTrue(add.isIllegal());

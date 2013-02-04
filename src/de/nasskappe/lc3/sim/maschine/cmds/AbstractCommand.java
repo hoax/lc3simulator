@@ -5,7 +5,7 @@ import de.nasskappe.lc3.sim.maschine.LC3;
 public abstract class AbstractCommand implements ICommand {
 
 	private short code;
-	private boolean isIllegal;
+	private boolean isIllegal = false;
 	private int codePosition;
 
 	@Override

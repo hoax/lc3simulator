@@ -16,4 +16,6 @@ public interface ICommand {
 	
 	int getCodePosition();
 	void setCodePosition(int codePosition);
+	
+	boolean isIllegal();
 }

@@ -13,7 +13,7 @@ public class LEATest {
 	}
 
 	@Test
-	public void test_positive_offset() throws IllegalOpcodeException {
+	public void test_positive_offset() {
 		LEA lea = new LEA();
 		lea.init(b("1110 111 0 1111 1111"));
 		
@@ -22,7 +22,7 @@ public class LEATest {
 	}
 
 	@Test
-	public void test_negative_offset() throws IllegalOpcodeException {
+	public void test_negative_offset() {
 		LEA lea = new LEA();
 		lea.init(b("1110 000 1 1111 1101"));
 		

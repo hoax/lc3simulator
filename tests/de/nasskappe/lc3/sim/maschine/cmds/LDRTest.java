@@ -13,7 +13,7 @@ public class LDRTest {
 	}
 
 	@Test
-	public void test_positive_offset() throws IllegalOpcodeException {
+	public void test_positive_offset() {
 		LDR ldr = new LDR();
 		ldr.init(b("0110 111 101 011111"));
 		
@@ -23,7 +23,7 @@ public class LDRTest {
 	}
 
 	@Test
-	public void test_negative_offset() throws IllegalOpcodeException {
+	public void test_negative_offset() {
 		LDR ldr = new LDR();
 		ldr.init(b("0110 101 111 111111"));
 		

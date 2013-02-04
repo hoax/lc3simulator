@@ -15,7 +15,7 @@ public class JSRTest {
 	}
 
 	@Test
-	public void test_positive() throws IllegalOpcodeException {
+	public void test_positive() {
 		JSR jsr = new JSR();
 		jsr.init(b("0100  1 010 1010 1010"));
 		
@@ -24,7 +24,7 @@ public class JSRTest {
 	}
 
 	@Test
-	public void test_negative() throws IllegalOpcodeException {
+	public void test_negative() {
 		JSR jsr = new JSR();
 		jsr.init(b("0100 1 101 0101 0110"));
 		
@@ -33,14 +33,14 @@ public class JSRTest {
 	}
 	
 	@Test
-	public void test_invalid() throws IllegalOpcodeException {
+	public void test_invalid() {
 		JSR jsr = new JSR();
 		jsr.init(b("0100 0 101 0101 0110"));
 		assertTrue(jsr.isIllegal());
 	}		
 
 	@Test
-	public void test_register() throws IllegalOpcodeException {
+	public void test_register() {
 		JSR jsr = new JSR();
 		jsr.init(b("0100 000 001 000000"));
 		

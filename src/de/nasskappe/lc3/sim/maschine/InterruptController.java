@@ -8,6 +8,8 @@ public class InterruptController {
 	public final static int INTERRUPT_PRIORITY_KEYBOARD = 4;
 	
 	public enum Interrupt {
+		PRIVILEGE_MODE_VIOLATION(0x0), 
+		ILLEGAL_OPCODE(0x1),
 		KEYBOARD(0x80);
 		
 		private int vector;
@@ -21,7 +23,7 @@ public class InterruptController {
 		}
 	}
 	
-	public class InterruptRequest implements Comparable<InterruptRequest> {
+	public static class InterruptRequest implements Comparable<InterruptRequest> {
 		private Interrupt interrupt;
 		private int priority;
 		
@@ -42,7 +44,6 @@ public class InterruptController {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + getOuterType().hashCode();
 			result = prime * result
 					+ ((interrupt == null) ? 0 : interrupt.hashCode());
 			return result;
@@ -57,15 +58,9 @@ public class InterruptController {
 			if (getClass() != obj.getClass())
 				return false;
 			InterruptRequest other = (InterruptRequest) obj;
-			if (!getOuterType().equals(other.getOuterType()))
-				return false;
 			if (interrupt != other.interrupt)
 				return false;
 			return true;
-		}
-
-		private InterruptController getOuterType() {
-			return InterruptController.this;
 		}
 
 		@Override
@@ -107,4 +102,5 @@ public class InterruptController {
 	public InterruptRequest getNextInterrupt() {
 		return pendingInterrupts.poll();
 	}
+
 }

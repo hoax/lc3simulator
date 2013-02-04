@@ -11,7 +11,7 @@ public class RETTest {
 	}
 
 	@Test
-	public void testValid() throws IllegalOpcodeException {
+	public void testValid() {
 		RET ret = new RET();
 		ret.init(b("1100 000 111 000000"));
 	}

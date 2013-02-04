@@ -5,6 +5,11 @@ import de.nasskappe.lc3.sim.maschine.LC3;
 public class Reserved extends AbstractCommand {
 
 	@Override
+	public boolean isIllegal() {
+		return true;
+	}
+	
+	@Override
 	public void execute(LC3 lc3) {
 	}
 

@@ -13,7 +13,7 @@ public class BRTest {
 	}
 	
 	@Test
-	public void testPNZ() throws IllegalOpcodeException {
+	public void testPNZ() {
 		BR br = new BR();
 		br.init(b("0000 111 101010101"));
 		
@@ -24,7 +24,7 @@ public class BRTest {
 	}
 
 	@Test
-	public void testP() throws IllegalOpcodeException {
+	public void testP() {
 		BR br = new BR();
 		br.init(b("0000 001 000000101"));
 		
@@ -35,7 +35,7 @@ public class BRTest {
 	}
 	
 	@Test
-	public void testN() throws IllegalOpcodeException {
+	public void testN() {
 		BR br = new BR();
 		br.init(b("0000 100 011111111"));
 		
@@ -46,7 +46,7 @@ public class BRTest {
 	}
 	
 	@Test
-	public void testZ() throws IllegalOpcodeException {
+	public void testZ() {
 		BR br = new BR();
 		br.init(b("0000 010 100000000"));
 		

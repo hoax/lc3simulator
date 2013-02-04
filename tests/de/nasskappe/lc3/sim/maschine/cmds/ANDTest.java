@@ -14,7 +14,7 @@ public class ANDTest {
 	}
 
 	@Test
-	public void test_two_registers() throws IllegalOpcodeException {
+	public void test_two_registers()  {
 		AND and = new AND();
 		and.init(b("0101 010 001 0 00 000"));
 		
@@ -36,7 +36,7 @@ public class ANDTest {
 	}
 
 	@Test
-	public void test_invalid_opcode() throws IllegalOpcodeException {
+	public void test_invalid_opcode() {
 		AND and = new AND();
 		and.init(b("0001 111 101 0 11 000"));
 		assertTrue(and.isIllegal());

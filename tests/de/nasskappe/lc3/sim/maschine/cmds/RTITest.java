@@ -11,7 +11,7 @@ public class RTITest {
 	}
 
 	@Test
-	public void testValid() throws IllegalOpcodeException {
+	public void testValid() {
 		RTI ret = new RTI();
 		ret.init(b("1000 000 000 000000"));
 	}

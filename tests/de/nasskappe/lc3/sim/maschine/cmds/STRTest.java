@@ -13,7 +13,7 @@ public class STRTest {
 	}
 
 	@Test
-	public void test_positive_offset() throws IllegalOpcodeException {
+	public void test_positive_offset() {
 		STR str = new STR();
 		str.init(b("0111 111 101 011111"));
 		
@@ -23,7 +23,7 @@ public class STRTest {
 	}
 
 	@Test
-	public void test_negative_offset() throws IllegalOpcodeException {
+	public void test_negative_offset() {
 		STR str = new STR();
 		str.init(b("0111 101 111 111111"));
 		

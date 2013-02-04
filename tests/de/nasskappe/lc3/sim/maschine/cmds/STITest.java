@@ -13,7 +13,7 @@ public class STITest {
 	}
 
 	@Test
-	public void test_positive_offset() throws IllegalOpcodeException {
+	public void test_positive_offset() {
 		STI sti = new STI();
 		sti.init(b("1011 111 0 1111 1111"));
 		
@@ -22,7 +22,7 @@ public class STITest {
 	}
 
 	@Test
-	public void test_negative_offset() throws IllegalOpcodeException {
+	public void test_negative_offset() {
 		STI sti = new STI();
 		sti.init(b("1011 000 1 1111 1101"));
 		
