@@ -22,9 +22,10 @@ public class AddressTableCellRenderer extends DefaultCodeTableCellRenderer {
 
 		if (value instanceof Number) {
 			int address = ((Number) value).intValue() & 0xFFFF;
-			String text = lc3.getSymbolTable().findSymbolByAddress(address);
-			if (text == null) {
-				text = String.format("0x%04X", address);
+			String label = lc3.getSymbolTable().findSymbolByAddress(address);
+			String text = String.format("0x%04X", address);
+			if (label != null) {
+				text = text + " " + label;
 			}
 			((JLabel)x).setText(text);
 			setToolTipText(text);

@@ -234,7 +234,7 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 				label = toHexString(address);
 			}
 
-			sb.append(toHexString(cmd.getCodePosition() + 1 + cmd.getPCOffset()));
+			sb.append(label);
 			
 			return sb.toString();
 		}

@@ -86,7 +86,7 @@ public class CodePanel extends JPanel {
 		table.getColumnModel().getColumn(0).setMinWidth(22);
 
 		table.getColumnModel().getColumn(1).setResizable(true);
-		table.getColumnModel().getColumn(1).setMaxWidth(180);
+		table.getColumnModel().getColumn(1).setPreferredWidth(80);
 		table.getColumnModel().getColumn(1).setMinWidth(80);
 
 		table.getColumnModel().getColumn(2).setResizable(false);
