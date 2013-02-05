@@ -107,9 +107,7 @@ public class CodeTableModel extends AbstractTableModel implements ILC3Listener, 
 
 	@Override
 	public void stateChanged(LC3 lc3, Lc3State oldState, Lc3State newState) {
-		if (newState == Lc3State.STOPPED) {
-			updatePC();
-		}
+		updatePC();
 	}
 	
 	private void updatePC() {

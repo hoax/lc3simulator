@@ -414,7 +414,6 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	private JTable createRegisterTable() {
 		RegisterTableModel model = new RegisterTableModel(lc3);
 		lc3.addListener(model);
-		model.registerChanged(lc3, Register.IR, (short) 0, (short) 0);
 
 		final JTable table = new JTable();
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
