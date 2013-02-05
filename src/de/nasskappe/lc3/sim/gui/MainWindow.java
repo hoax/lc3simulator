@@ -157,7 +157,6 @@ public class MainWindow extends JFrame implements ILC3Listener {
 			String version = mf.getMainAttributes().getValue("SCM-Revision");
 			setTitle(getTitle() + " - " + version);
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -303,11 +302,9 @@ public class MainWindow extends JFrame implements ILC3Listener {
 			if (address == null) {
 				address = NumberUtils.stringToInt(addressString);
 			}
-			
 			address = address & 0xffff;
 			
-			addressString = String.format("%04x", address);
-			addressModel.addAddress(address);
+			addressModel.addAddress(addressString);
 			
 			codePanel.setSelectedRow(address);
 			codePanel.scrollTo(address);

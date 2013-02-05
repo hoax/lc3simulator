@@ -31,9 +31,14 @@ public class HexNumberComboBoxModel extends AbstractListModel implements ComboBo
 		if ((selectedObject != null && !selectedObject.equals( anObject )) ||
 				selectedObject == null && anObject != null) {
 
-			int number = NumberUtils.stringToInt(anObject.toString());
+			try {
+				int number;
+				number = NumberUtils.stringToInt(anObject.toString());
+				selectedObject = formatter.format(number);
+			} catch (Exception e) {
+				selectedObject = anObject;
+			}
 			
-			selectedObject = formatter.format(number);
 			
 			fireContentsChanged(this, 0, getSize() - 1);
 
@@ -41,8 +46,13 @@ public class HexNumberComboBoxModel extends AbstractListModel implements ComboBo
 	}
 
 	public void addAddress(Object anObject) {
-		int number = NumberUtils.stringToInt(anObject.toString());
-		String s = formatter.format(number);
+		String s = String.valueOf(anObject);
+		int number;
+		try {
+			number = NumberUtils.stringToInt(anObject.toString());
+			s = formatter.format(number);
+		} catch (Exception e) {
+		}
 		if (!addresses.contains(s)) {
 			addresses.add(s);
 			Collections.sort(addresses);
