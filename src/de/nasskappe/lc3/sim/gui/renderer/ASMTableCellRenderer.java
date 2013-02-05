@@ -94,6 +94,11 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 				if (label == null) {
 					label = toHexString(address);
 				}
+				
+				if (cmd.getCode() == (cmd.getCode() & 0xFF)) {
+					label = label + "  '" + (char) cmd.getCode() + "'";
+				}
+				
 				sb.append(label);
 			}
 			
