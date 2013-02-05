@@ -73,7 +73,7 @@ public class SymbolTable {
 	}
 	
 	public void addSymbolsFrom(Reader input) {
-		Pattern p = Pattern.compile("//\\s+(\\S+)\\s+(\\d+).*");
+		Pattern p = Pattern.compile("//\\s+(\\S+)\\s+([\\dA-Fa-f]+).*");
 		BufferedReader reader = new BufferedReader(input);
 		try {
 			String line;
