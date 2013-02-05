@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
@@ -21,13 +23,17 @@ import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
 public class LoadFileAction extends AbstractAction implements ILC3Listener {
 
+	Preferences prefs;
+	
 	JFileChooser fc;
 	Window window;
 	private LC3 lc3;
 	private Icon icon;
 	
 	public LoadFileAction(Window parentWindow, LC3 lc3) {
-		fc = new JFileChooser(new File("."));
+		prefs = Preferences.userNodeForPackage(MainWindow.class);
+		String lastOpenDir = prefs.get("lastOpenDir", ".");
+		fc = new JFileChooser(new File(lastOpenDir));
 		
 		window = parentWindow;
 		this.lc3 = lc3;
@@ -51,9 +57,12 @@ public class LoadFileAction extends AbstractAction implements ILC3Listener {
 				File file = fc.getSelectedFile();
 				loadDataFromFile(file);
 				lc3.getSymbolTable().addSymbolsFromFile(file);
+				
+				prefs.put("lastOpenDir", file.getParentFile().getAbsolutePath());
+				prefs.sync();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
+			} catch (BackingStoreException e) {
 			}
 		}
 	}
