@@ -29,7 +29,7 @@ public class DefaultCodeTableCellRenderer extends DefaultTableCellRenderer {
 		JLabel comp = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
 				row, column);
 		
-		if (lc3 != null && row == lc3.getPC()) {
+		if (lc3 != null && row == lc3.getPC() && lc3.isStopped()) {
 			comp.setBackground(PC_COLOR);
 		}
 		
