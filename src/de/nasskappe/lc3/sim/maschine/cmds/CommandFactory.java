@@ -19,7 +19,7 @@ public class CommandFactory {
 		mapping.add(NOT.class); // 1001
 		mapping.add(LDI.class); // 1010
 		mapping.add(STI.class); // 1011
-		mapping.add(RET.class); // 1100
+		mapping.add(JMP.class); // 1100
 		mapping.add(Reserved.class); // 1101
 		mapping.add(LEA.class); // 1110
 		mapping.add(TRAP.class); // 1111

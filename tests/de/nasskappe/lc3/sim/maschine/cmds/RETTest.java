@@ -12,13 +12,13 @@ public class RETTest {
 
 	@Test
 	public void testValid() {
-		RET ret = new RET();
+		JMP ret = new JMP();
 		ret.init(b("1100 000 111 000000"));
 	}
 
 	@Test
 	public void testInvalid() throws Exception {
-		RET ret = new RET();
+		JMP ret = new JMP();
 		ret.init(b("1100 010 111 000000"));
 		assertTrue(ret.isIllegal());
 	}

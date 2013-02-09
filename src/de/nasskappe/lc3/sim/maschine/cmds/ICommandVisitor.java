@@ -11,7 +11,7 @@ public interface ICommandVisitor {
 	Object visit(LDR cmd);
 	Object visit(LEA cmd);
 	Object visit(NOT cmd);
-	Object visit(RET cmd);
+	Object visit(JMP cmd);
 	Object visit(RTI cmd);
 	Object visit(ST cmd);
 	Object visit(STI cmd);

@@ -16,7 +16,7 @@ import de.nasskappe.lc3.sim.maschine.Register.CC_Value;
 import de.nasskappe.lc3.sim.maschine.cmds.CommandFactory;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 import de.nasskappe.lc3.sim.maschine.cmds.JSR;
-import de.nasskappe.lc3.sim.maschine.cmds.RET;
+import de.nasskappe.lc3.sim.maschine.cmds.JMP;
 import de.nasskappe.lc3.sim.maschine.cmds.RTI;
 import de.nasskappe.lc3.sim.maschine.cmds.TRAP;
 import de.nasskappe.lc3.sim.maschine.mem.IMemoryListener;
@@ -213,7 +213,7 @@ public class LC3 {
 		
 		ICommand lastCmd = null;
 		int retsUntilReturn = 1;
-		Class<?> returnClass = RET.class;
+		Class<?> returnClass = JMP.class;
 		if (utils.isSupervisor())
 			returnClass = RTI.class;
 		
@@ -227,7 +227,7 @@ public class LC3 {
 					|| lastCmd.getClass() == JSR.class) {
 				retsUntilReturn++;
 			}
-			else if (lastCmd.getClass() == RET.class) {
+			else if (lastCmd.getClass() == JMP.class) {
 				retsUntilReturn--;
 			}
 		}

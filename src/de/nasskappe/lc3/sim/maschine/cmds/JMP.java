@@ -3,26 +3,35 @@ package de.nasskappe.lc3.sim.maschine.cmds;
 import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.Register;
 
-public class RET extends AbstractCommand {
+public class JMP extends AbstractCommand {
 
+	Register baseR = null;
+	
 	@Override
 	public void init(short code) {
 		super.init(code);
 		
-		if ((code & 0x0FFF) != 0x01C0) {
+		int r = (code >> 6) & 0x7;
+		baseR = Register.values()[r];
+		
+		if ((code & 0x0E3F) != 0) {
 			setIllegal(true);
 		}
 	}
 	
 	@Override
 	public void execute(LC3 lc3) {
-		short addr = lc3.getRegister(Register.R7);
+		short addr = lc3.getRegister(baseR);
 		lc3.setPC(addr);
 	}
 
 	@Override
 	public String getASM() {
-		return "RET";
+		return "JMP";
+	}
+	
+	public Register getBaseR() {
+		return baseR;
 	}
 
 	@Override

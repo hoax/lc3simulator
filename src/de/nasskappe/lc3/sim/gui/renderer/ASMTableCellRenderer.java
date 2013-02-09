@@ -6,6 +6,7 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 
 import de.nasskappe.lc3.sim.maschine.LC3;
+import de.nasskappe.lc3.sim.maschine.Register;
 import de.nasskappe.lc3.sim.maschine.cmds.ADD;
 import de.nasskappe.lc3.sim.maschine.cmds.AND;
 import de.nasskappe.lc3.sim.maschine.cmds.BR;
@@ -17,7 +18,7 @@ import de.nasskappe.lc3.sim.maschine.cmds.LDI;
 import de.nasskappe.lc3.sim.maschine.cmds.LDR;
 import de.nasskappe.lc3.sim.maschine.cmds.LEA;
 import de.nasskappe.lc3.sim.maschine.cmds.NOT;
-import de.nasskappe.lc3.sim.maschine.cmds.RET;
+import de.nasskappe.lc3.sim.maschine.cmds.JMP;
 import de.nasskappe.lc3.sim.maschine.cmds.RTI;
 import de.nasskappe.lc3.sim.maschine.cmds.Reserved;
 import de.nasskappe.lc3.sim.maschine.cmds.ST;
@@ -210,9 +211,14 @@ public class ASMTableCellRenderer extends DefaultCodeTableCellRenderer {
 		}
 
 		@Override
-		public Object visit(RET cmd) {
+		public Object visit(JMP cmd) {
 			sb.setLength(0);
-			sb.append(cmd.getASM());
+			
+			if (cmd.getBaseR() == Register.R7) {
+				sb.append("RET / JMP R7");
+			} else {
+				sb.append(cmd.getASM()).append(" ").append(cmd.getBaseR());
+			}
 
 			return sb.toString();
 		}
