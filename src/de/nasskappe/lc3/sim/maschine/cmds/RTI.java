@@ -2,6 +2,7 @@ package de.nasskappe.lc3.sim.maschine.cmds;
 
 import de.nasskappe.lc3.sim.maschine.LC3;
 import de.nasskappe.lc3.sim.maschine.Register;
+import de.nasskappe.lc3.sim.maschine.mem.Memory;
 
 public class RTI extends AbstractCommand {
 
@@ -19,7 +20,7 @@ public class RTI extends AbstractCommand {
 		if (!lc3.getUtils().isSupervisor()) {
 			lc3.handlePrivilegeModeViolation();
 		} else {
-			short ssp = lc3.getRegister(Register.SSP);
+			short ssp = lc3.getRegister(Register.R6);
 			short oldPSR = lc3.getMemory().getValue(ssp++);
 			short oldPC = lc3.getMemory().getValue(ssp++);
 			lc3.setRegister(Register.R6, ssp);
@@ -28,7 +29,8 @@ public class RTI extends AbstractCommand {
 			lc3.setRegister(Register.PSR, oldPSR);
 			
 			if (!lc3.getUtils().isSupervisor()) {
-				short usp = lc3.getRegister(Register.USP);
+				lc3.getMemory().setValue(Memory.SSP_ADDR, ssp); // save SSP
+				short usp = lc3.getMemory().getValue(Memory.USP_ADDR);
 				lc3.setRegister(Register.R6, usp);
 			}
 		}

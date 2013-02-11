@@ -15,8 +15,8 @@ import de.nasskappe.lc3.sim.maschine.InterruptController.InterruptRequest;
 import de.nasskappe.lc3.sim.maschine.Register.CC_Value;
 import de.nasskappe.lc3.sim.maschine.cmds.CommandFactory;
 import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
-import de.nasskappe.lc3.sim.maschine.cmds.JSR;
 import de.nasskappe.lc3.sim.maschine.cmds.JMP;
+import de.nasskappe.lc3.sim.maschine.cmds.JSR;
 import de.nasskappe.lc3.sim.maschine.cmds.RTI;
 import de.nasskappe.lc3.sim.maschine.cmds.TRAP;
 import de.nasskappe.lc3.sim.maschine.mem.IMemoryListener;
@@ -164,7 +164,12 @@ public class LC3 {
 		// save PC and PSR
 		short oldPSR = getRegister(Register.PSR);
 		short oldPC = getRegister(Register.PC);
-		short ssp = getRegister(Register.SSP);
+		
+		short ssp = getRegister(Register.R6);
+		if (!utils.isSupervisor()) {
+			mem.setValue(Memory.USP_ADDR, ssp); // save USP
+			ssp = mem.getValue(Memory.SSP_ADDR);
+		}
 		
 		getMemory().setValue(--ssp, oldPC);
 		getMemory().setValue(--ssp, oldPSR);
@@ -353,13 +358,6 @@ public class LC3 {
 	public void setRegister(Register register, Short value) {
 		Short oldValue = this.register.get(register);
 		this.register.put(register, value);
-		if (register == Register.R6) {
-			if (utils.isSupervisor()) {
-				this.register.put(Register.SSP, value);
-			} else {
-				this.register.put(Register.USP, value);
-			}
-		}
 		if (oldValue == null)
 			oldValue = 0;
 		fireRegisterChanged(register, oldValue, value);
@@ -505,15 +503,13 @@ public class LC3 {
 			}
 		}
 		
-		setRegister(Register.USP, (short) 0);
-		setRegister(Register.SSP, (short) 0x3000);
 		setRegister(Register.R0, (short) 0);
 		setRegister(Register.R1, (short) 0);
 		setRegister(Register.R2, (short) 0);
 		setRegister(Register.R3, (short) 0);
 		setRegister(Register.R4, (short) 0);
 		setRegister(Register.R5, (short) 0);
-		setRegister(Register.R6, (short) 0);
+		setRegister(Register.R6, mem.getValue(Memory.USP_ADDR));
 		setRegister(Register.R7, (short) 0);
 		setRegister(Register.PSR, (short) 0x8000);
 		setRegister(Register.IR, (short) 0);

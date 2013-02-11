@@ -10,6 +10,9 @@ public class Memory {
 	public final static int ADDR_KBDR = 0xFE02;
 	public final static int ADDR_KBSR = 0xFE00;
 	public final static int ADDR_MCR = 0xFFFE;
+	
+	public final static int USP_ADDR = 0xFEFE;
+	public final static int SSP_ADDR = 0xFEFF;
 
 	private List<IMemoryListener> listeners;
 	
@@ -27,6 +30,7 @@ public class Memory {
 	}
 	
 	public void setValue(int addr, short value) {
+		addr = addr & 0xFFFF;
 		short oldValue = mem[addr];
 		mem[addr] = value;
 		fireMemoryChanged(addr, oldValue, value);
