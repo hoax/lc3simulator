@@ -171,8 +171,8 @@ public class LC3 {
 			ssp = mem.getValue(Memory.SSP_ADDR);
 		}
 		
-		getMemory().setValue(--ssp, oldPC);
 		getMemory().setValue(--ssp, oldPSR);
+		getMemory().setValue(--ssp, oldPC);
 		
 		// switch to supervisor mode
 		utils.setSupervisor(true);

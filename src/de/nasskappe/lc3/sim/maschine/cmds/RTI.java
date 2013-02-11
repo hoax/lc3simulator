@@ -21,8 +21,8 @@ public class RTI extends AbstractCommand {
 			lc3.handlePrivilegeModeViolation();
 		} else {
 			short ssp = lc3.getRegister(Register.R6);
-			short oldPSR = lc3.getMemory().getValue(ssp++);
 			short oldPC = lc3.getMemory().getValue(ssp++);
+			short oldPSR = lc3.getMemory().getValue(ssp++);
 			lc3.setRegister(Register.R6, ssp);
 			
 			lc3.setRegister(Register.PC, oldPC);
