@@ -407,7 +407,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		debugMenu.add(new JSeparator());
 		
 		JMenuItem setPcBtn = new JMenuItem(setPcToCurrentSelectionAction);
-		setPcBtn.setAccelerator(KeyStroke.getKeyStroke("F10"));
+		setPcBtn.setAccelerator(KeyStroke.getKeyStroke("F4"));
 		debugMenu.add(setPcBtn);
 	}
 
@@ -432,7 +432,6 @@ public class MainWindow extends JFrame implements ILC3Listener {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
-					System.out.println(table.columnAtPoint(e.getPoint()));
 					if (table.columnAtPoint(e.getPoint()) == 4
 							&& table.rowAtPoint(e.getPoint()) == 1) {
 						scrollToPC();

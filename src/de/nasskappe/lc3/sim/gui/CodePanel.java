@@ -50,8 +50,8 @@ public class CodePanel extends JPanel {
 						return false;
 					}
 					
-					if (k.getKeyCode() >= KeyEvent.VK_F5
-							&& k.getKeyCode() <= KeyEvent.VK_F10) {
+					if (k.getKeyCode() >= KeyEvent.VK_F4
+							&& k.getKeyCode() < KeyEvent.VK_F10) {
 						return false;
 					}
 				}
@@ -101,7 +101,6 @@ public class CodePanel extends JPanel {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (SwingUtilities.isLeftMouseButton(e) && e.getClickCount() == 2) {
-					System.out.println(table.columnAtPoint(e.getPoint()));
 					if (table.columnAtPoint(e.getPoint()) == 0) {
 						toggleBreakpointAtSelectedAddress();
 					}
@@ -131,7 +130,6 @@ public class CodePanel extends JPanel {
 	}
 
 	private void toggleBreakpointAtSelectedAddress() {
-		System.out.println("toggleBreakpoint!");
 		int selectedRow = table.getSelectedRow();
 		lc3.toggleAddressBreakpoint(selectedRow);
 	}

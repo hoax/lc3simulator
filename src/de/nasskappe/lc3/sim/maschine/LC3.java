@@ -451,10 +451,8 @@ public class LC3 {
 	 */
 	public void setAddressBreakpoint(Integer address, Boolean aValue) {
 		if (aValue) {
-			System.out.println("add breakpoint " + address);
 			addressBreakpoints.add(address);
 		} else {
-			System.out.println("remove breakpoint " + address);
 			addressBreakpoints.remove(address);
 		}
 		
