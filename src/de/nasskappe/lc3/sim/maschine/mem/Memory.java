@@ -11,6 +11,7 @@ public class Memory {
 	public final static int ADDR_KBSR = 0xFE00;
 	public final static int ADDR_MCR = 0xFFFE;
 	
+	public final static int PSR_ADDR = 0xFEFD;
 	public final static int USP_ADDR = 0xFEFE;
 	public final static int SSP_ADDR = 0xFEFF;
 

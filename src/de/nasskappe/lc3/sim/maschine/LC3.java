@@ -358,6 +358,9 @@ public class LC3 {
 	public void setRegister(Register register, Short value) {
 		Short oldValue = this.register.get(register);
 		this.register.put(register, value);
+		if (register == Register.PSR) {
+			mem.setValue(Memory.PSR_ADDR, value);
+		}
 		if (oldValue == null)
 			oldValue = 0;
 		fireRegisterChanged(register, oldValue, value);
