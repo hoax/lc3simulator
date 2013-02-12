@@ -135,6 +135,9 @@ public class RegisterTableModel extends AbstractTableModel implements ILC3Listen
 
 	@Override
 	public void registerChanged(LC3 lc3, Register r, short oldValue, short value) {
+		if (lc3.isStopped()) {
+			fireTableDataChanged();
+		}
 	}
 
 	@Override
