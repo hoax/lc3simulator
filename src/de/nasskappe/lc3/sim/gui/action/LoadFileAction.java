@@ -23,6 +23,29 @@ import de.nasskappe.lc3.sim.maschine.cmds.ICommand;
 
 public class LoadFileAction extends AbstractAction implements ILC3Listener {
 
+	private class PatternFileFilter extends javax.swing.filechooser.FileFilter {
+		
+		private String desc;
+		private String pattern;
+
+		public PatternFileFilter(String desc, String pattern) {
+			this.desc = desc;
+			this.pattern = pattern;
+		}
+		
+		@Override
+		public boolean accept(File pathname) {
+			return pathname.isDirectory() 
+					|| pathname.getName().matches(pattern);
+		}
+
+		@Override
+		public String getDescription() {
+			return desc;
+		}
+		
+	}
+	
 	Preferences prefs;
 	
 	JFileChooser fc;
@@ -33,7 +56,15 @@ public class LoadFileAction extends AbstractAction implements ILC3Listener {
 	public LoadFileAction(Window parentWindow, LC3 lc3) {
 		prefs = Preferences.userNodeForPackage(MainWindow.class);
 		String lastOpenDir = prefs.get("lastOpenDir", ".");
+		
+		PatternFileFilter objFilter = new PatternFileFilter("Object Files (*.obj)", "(?i).*\\.obj");
+		PatternFileFilter allFilter = new PatternFileFilter("All Files (*.*)", ".*");
+		
 		fc = new JFileChooser(new File(lastOpenDir));
+		fc.setAcceptAllFileFilterUsed(false);
+		fc.addChoosableFileFilter(objFilter);
+		fc.addChoosableFileFilter(allFilter);
+		fc.setFileFilter(objFilter);
 		
 		window = parentWindow;
 		this.lc3 = lc3;
