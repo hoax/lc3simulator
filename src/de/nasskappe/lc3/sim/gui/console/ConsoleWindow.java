@@ -25,7 +25,6 @@ public class ConsoleWindow extends JDialog implements IMemoryListener {
 	
 	private JTextArea textArea;
 	private volatile boolean displayBusy;
-	private volatile boolean keyboardCharacterIsWaiting;
 	private Memory mem;
 	private LC3 lc3;
 
@@ -64,14 +63,14 @@ public class ConsoleWindow extends JDialog implements IMemoryListener {
 	}
 
 	protected void handleKeypress(KeyEvent e) {
-		if (mem != null) {
+		if (mem != null && !lc3.isStopped()) {
 			if (!isCharacterWaiting()) { // previous character was read
 				// put value into memory
 				mem.setValue(Memory.ADDR_KBDR, (short) e.getKeyChar());
 				setCharacterIsWaiting();
-				if (isKeyboardInterruptEnabled()) {
-					lc3.getInterruptController().interruptKeyboard();
-				}
+			}
+			if (isKeyboardInterruptEnabled()) {
+				lc3.getInterruptController().interruptKeyboard();
 			}
 		}
 	}
@@ -83,18 +82,17 @@ public class ConsoleWindow extends JDialog implements IMemoryListener {
 	}
 
 	private boolean isCharacterWaiting() {
-		return keyboardCharacterIsWaiting;
+		short value = mem.getValue(Memory.ADDR_KBSR);
+		return (value & BITMASK_KEYBOARD_READY) != 0;
 	}
 	
 	private void unsetCharacterIsWaiting() {
-		keyboardCharacterIsWaiting = false;
 		short value = mem.getValue(Memory.ADDR_KBSR);
 		value = (short) (value & ~BITMASK_KEYBOARD_READY);
 		mem.setValue(Memory.ADDR_KBSR, value);
 	}
 	
 	private void setCharacterIsWaiting() {
-		keyboardCharacterIsWaiting = true;
 		short value = mem.getValue(Memory.ADDR_KBSR);
 		value = (short) (value | BITMASK_KEYBOARD_READY);
 		mem.setValue(Memory.ADDR_KBSR, value);

@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.nasskappe.lc3.sim</groupId>
 	<artifactId>lc3simulator</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.3</version>
 	<name>lc3simulator</name>
 	<build>
 	    <finalName>${project.artifactId}-${version}-${buildNumber}</finalName>
@@ -57,6 +57,23 @@
 						</manifestEntries>
 					</archive>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>exec-maven-plugin</artifactId>
+				<groupId>org.codehaus.mojo</groupId>
+				<executions>
+					<execution><!-- Run our version calculation script -->
+						<id>copy releases to dropbox</id>
+						<phase>package</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>${basedir}/copy-releases.sh</executable>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 
 		</plugins>
