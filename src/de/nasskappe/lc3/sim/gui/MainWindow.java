@@ -42,6 +42,7 @@ import de.nasskappe.lc3.sim.gui.action.DebuggerStepIntoAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepOverAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStepReturnAction;
 import de.nasskappe.lc3.sim.gui.action.DebuggerStopAction;
+import de.nasskappe.lc3.sim.gui.action.DebuggerToggleBreakpointAction;
 import de.nasskappe.lc3.sim.gui.action.LoadFileAction;
 import de.nasskappe.lc3.sim.gui.action.ResetAction;
 import de.nasskappe.lc3.sim.gui.action.SetPCToCurrentSelectionAction;
@@ -70,6 +71,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 	private DebuggerStepReturnAction stepReturnAction;
 	private ShowConsoleAction showConsoleAction;
 	private SetPCToCurrentSelectionAction setPcToCurrentSelectionAction;
+	private DebuggerToggleBreakpointAction toggleBreakpointAction;
 	private ResetAction resetAction;
 	
 	private JButton btnGo;
@@ -125,6 +127,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		stepOverAction = new DebuggerStepOverAction(lc3.getUtils(), scrollToPcRunnable);
 		stepReturnAction = new DebuggerStepReturnAction(lc3.getUtils(), scrollToPcRunnable);
 		setPcToCurrentSelectionAction = new SetPCToCurrentSelectionAction(lc3, codePanel.getTable());
+		toggleBreakpointAction = new DebuggerToggleBreakpointAction(lc3, codePanel.getTable());
 		
 		lc3.addListener(loadFileAction);
 		lc3.addListener(runAction);
@@ -409,6 +412,10 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		JMenuItem setPcBtn = new JMenuItem(setPcToCurrentSelectionAction);
 		setPcBtn.setAccelerator(KeyStroke.getKeyStroke("F4"));
 		debugMenu.add(setPcBtn);
+		
+		JMenuItem toggleBreakpointBtn = new JMenuItem(toggleBreakpointAction);
+		toggleBreakpointBtn.setAccelerator(KeyStroke.getKeyStroke("control B"));
+		debugMenu.add(toggleBreakpointBtn);
 	}
 
 	private JTable createRegisterTable() {

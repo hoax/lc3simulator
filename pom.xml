@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.nasskappe.lc3.sim</groupId>
 	<artifactId>lc3simulator</artifactId>
-	<version>1.0.3</version>
+	<version>1.0.4</version>
 	<name>lc3simulator</name>
 	<build>
 	    <finalName>${project.artifactId}-${version}-${buildNumber}</finalName>

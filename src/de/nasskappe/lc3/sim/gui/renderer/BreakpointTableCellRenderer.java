@@ -15,9 +15,9 @@ public class BreakpointTableCellRenderer extends DefaultCodeTableCellRenderer {
 
 	public BreakpointTableCellRenderer(LC3 lc3, JTable table) {
 		super(lc3);
-		breakpointImage = new ImageIcon(getClass().getResource("breakpoint.png"));
+		breakpointImage = new ImageIcon(getClass().getResource("../icons/breakpoint.png"));
 		int height = table.getRowHeight() - 4;
-		breakpointImage =  new ImageIcon(breakpointImage.getImage().getScaledInstance(height, height, 0));
+		breakpointImage = new ImageIcon(breakpointImage.getImage().getScaledInstance(height, height, 0));
 	}
 	
 	@Override

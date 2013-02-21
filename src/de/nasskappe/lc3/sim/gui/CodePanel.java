@@ -2,19 +2,14 @@ package de.nasskappe.lc3.sim.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.EventObject;
 
-import javax.swing.AbstractAction;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
@@ -111,17 +106,7 @@ public class CodePanel extends JPanel {
 				}
 			}
 		});	
-		
-		// ctrl-B toggles breakpoint
-		table.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-			.put(KeyStroke.getKeyStroke(KeyEvent.VK_B, InputEvent.CTRL_DOWN_MASK), "toggleBreakpoint");
-		table.getActionMap().put("toggleBreakpoint", new AbstractAction("toggleBreakpoint") {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				toggleBreakpointAtSelectedAddress();
-			}
-		});
-		
+				
 		add(new JScrollPane(table), BorderLayout.CENTER);
 	}
 
