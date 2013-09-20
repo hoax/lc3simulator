@@ -377,7 +377,7 @@ public class MainWindow extends JFrame implements ILC3Listener {
 		exit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				setVisible(false);
+				dispose();
 			}
 		});
 		file.add(exit);
