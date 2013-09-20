@@ -1,8 +1,10 @@
 package de.nasskappe.lc3.sim.gui.editor;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTable;
 
@@ -21,6 +23,7 @@ public class NumberCellEditor extends DefaultCellEditor {
 		super(new JNumberField(disablePopup, formatter));
 
 		numberField = (JNumberField) editorComponent;
+		numberField.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		numberField.setFont(new Font("Courier New", Font.PLAIN, numberField.getFont().getSize()));
 	}
 
