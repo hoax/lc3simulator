@@ -15,7 +15,7 @@ public class BreakpointTableCellRenderer extends DefaultCodeTableCellRenderer {
 
 	public BreakpointTableCellRenderer(LC3 lc3, JTable table) {
 		super(lc3);
-		breakpointImage = new ImageIcon(getClass().getResource("../icons/breakpoint.png"));
+		breakpointImage = new ImageIcon(getClass().getResource("/de/nasskappe/lc3/sim/gui/icons/breakpoint.png"));
 		int height = table.getRowHeight() - 4;
 		breakpointImage = new ImageIcon(breakpointImage.getImage().getScaledInstance(height, height, 0));
 	}
